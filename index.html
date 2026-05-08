@@ -209,6 +209,20 @@
   }
   #quiz .feedback.ok { color: var(--good); }
   #quiz .feedback.no { color: #ff7a7a; }
+  #quiz .how {
+    margin-top: 8px;
+    background: #0e1430;
+    border: 1px solid #2a3470;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--ink);
+    white-space: pre-wrap;
+    line-height: 1.7;
+  }
+  #quiz .how b { color: var(--accent); }
   /* Celebration */
   .burst {
     position: absolute;
@@ -247,6 +261,8 @@
       <button class="tab" data-mod="pyth">📐 Pythagoras 3D & Trig</button>
       <button class="tab" data-mod="graph">📈 Graph Plotter</button>
       <button class="tab" data-mod="trans">🔄 Transformations</button>
+      <button class="tab" data-mod="trig">📏 Trig (SOHCAHTOA)</button>
+      <button class="tab" data-mod="circ">⭕ Circles & Sectors</button>
     </div>
     <div id="controls"></div>
     <details>
@@ -402,6 +418,9 @@ const Quiz = {
     inp.value = '';
     document.getElementById('qFeedback').textContent = '';
     document.getElementById('qFeedback').className = 'feedback';
+    const sub = document.getElementById('qSubmit');
+    sub.textContent = 'Submit ✓';
+    sub.onclick = () => Quiz.submit();
     document.getElementById('quiz').classList.add('show');
     setTimeout(() => inp.focus(), 50);
   },
@@ -420,20 +439,24 @@ const Quiz = {
       return;
     }
     const tol = Math.max(0.05, Math.abs(this.current.answer) * 0.02);
-    if (Math.abs(userVal - this.current.answer) <= tol) {
+    const ok = Math.abs(userVal - this.current.answer) <= tol;
+    if (ok) {
       Score.win();
-      fb.textContent = `✅ Correct! +${10 + Score.streak} pts (streak ×${Score.streak})`;
+      fb.innerHTML = `✅ Correct! +${10 + Score.streak} pts · 🔥 streak ×${Score.streak}` +
+        (this.current.how ? `<div class="how">${this.current.how}</div>` : '');
       fb.className = 'feedback ok';
-      setTimeout(() => {
-        // re-roll same module's challenge
-        const m = modules[active];
-        if (m.challenge) Quiz.open(m.challenge());
-      }, 1100);
     } else {
       Score.lose();
-      fb.textContent = `❌ Answer was ${fmt(this.current.answer, 3)}. Streak reset.`;
+      fb.innerHTML = `❌ Answer was <b>${fmt(this.current.answer, 2)}</b>` +
+        (this.current.how ? `<div class="how">${this.current.how}</div>` : '');
       fb.className = 'feedback no';
     }
+    // Hide submit until next question to avoid double-tap
+    document.getElementById('qSubmit').textContent = ok ? 'Next →' : 'Try another →';
+    document.getElementById('qSubmit').onclick = () => {
+      const m = modules[active];
+      if (m.challenge) Quiz.open(m.challenge());
+    };
   }
 };
 document.getElementById('qSubmit').addEventListener('click', () => Quiz.submit());
@@ -464,6 +487,28 @@ function makeMat(color, opts = {}) {
 function makeEdges(geom, color = 0x6ee7ff) {
   const e = new THREE.EdgesGeometry(geom);
   return new THREE.LineSegments(e, new THREE.LineBasicMaterial({ color }));
+}
+function makeLabel(text, color = '#ffffff') {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 80;
+  const ctx = canvas.getContext('2d');
+  ctx.font = 'bold 48px ui-monospace, Menlo, monospace';
+  ctx.fillStyle = color;
+  ctx.strokeStyle = '#0b1020';
+  ctx.lineWidth = 6;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.strokeText(text, 128, 40);
+  ctx.fillText(text, 128, 40);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.minFilter = THREE.LinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: tex, transparent: true, depthTest: false
+  }));
+  sprite.scale.set(1.6, 0.5, 1);
+  sprite.renderOrder = 999;
+  return sprite;
 }
 
 function slider(label, min, max, step, val, onInput) {
@@ -597,30 +642,61 @@ const Shapes = {
   challenge() {
     this.randomize();
     const s = this.state;
-    let answer, prompt;
     const ask = pick(['volume', 'sa']);
-    // recompute via draw — reuse logic via a switch
-    let V = 0, SA = 0, label = '';
     const PI = Math.PI;
-    if (s.kind === 'cube')      { V = s.a**3; SA = 6*s.a*s.a; label = `cube with side ${s.a}`; }
-    else if (s.kind === 'cuboid'){ V = s.a*s.b*s.c; SA = 2*(s.a*s.b+s.b*s.c+s.a*s.c);
-                                   label = `cuboid ${s.a}×${s.b}×${s.c}`; }
-    else if (s.kind === 'cylinder'){ V = PI*s.r**2*s.h; SA = 2*PI*s.r*(s.r+s.h);
-                                     label = `cylinder r=${s.r}, h=${s.h}`; }
-    else if (s.kind === 'cone'){ const l = Math.hypot(s.r,s.h);
-                                 V = (1/3)*PI*s.r**2*s.h; SA = PI*s.r*(s.r+l);
-                                 label = `cone r=${s.r}, h=${s.h}`; }
-    else if (s.kind === 'sphere'){ V = (4/3)*PI*s.r**3; SA = 4*PI*s.r**2;
-                                   label = `sphere r=${s.r}`; }
-    else if (s.kind === 'sqpyr'){ const l = Math.hypot(s.a/2,s.h);
-                                  V = (1/3)*s.a*s.a*s.h; SA = s.a*s.a + 2*s.a*l;
-                                  label = `square pyramid base=${s.a}, h=${s.h}`; }
-    else if (s.kind === 'triprism'){ const tri = 0.5*s.a*s.b, hyp = Math.hypot(s.a,s.b);
-                                     V = tri*s.c; SA = 2*tri + s.c*(s.a+s.b+hyp);
-                                     label = `triangular prism (legs ${s.a},${s.b}, length ${s.c})`; }
-    if (ask === 'volume') { answer = V; prompt = `<b>Volume</b> of ${label}?<br><span style="color:var(--muted); font-size:12px">(2 d.p., π = 3.14159)</span>`; }
-    else                  { answer = SA; prompt = `<b>Surface area</b> of ${label}?<br><span style="color:var(--muted); font-size:12px">(2 d.p., π = 3.14159)</span>`; }
-    return { title: '📦 Shape Challenge', text: prompt, answer };
+    let V = 0, SA = 0, label = '', howV = '', howSA = '';
+    if (s.kind === 'cube') {
+      V = s.a**3; SA = 6*s.a*s.a;
+      label = `cube with side ${s.a}`;
+      howV = `V = a³ = ${s.a}³ = <b>${fmt(V,2)}</b>`;
+      howSA = `SA = 6a² = 6 × ${s.a}² = <b>${fmt(SA,2)}</b>`;
+    } else if (s.kind === 'cuboid') {
+      V = s.a*s.b*s.c; SA = 2*(s.a*s.b+s.b*s.c+s.a*s.c);
+      label = `cuboid ${s.a}×${s.b}×${s.c}`;
+      howV = `V = a × b × c = ${s.a} × ${s.b} × ${s.c} = <b>${fmt(V,2)}</b>`;
+      howSA = `SA = 2(ab + bc + ac) = 2(${s.a*s.b} + ${s.b*s.c} + ${s.a*s.c}) = <b>${fmt(SA,2)}</b>`;
+    } else if (s.kind === 'cylinder') {
+      V = PI*s.r**2*s.h; SA = 2*PI*s.r*(s.r+s.h);
+      label = `cylinder r=${s.r}, h=${s.h}`;
+      howV = `V = πr²h = π × ${s.r}² × ${s.h} = <b>${fmt(V,2)}</b>`;
+      howSA = `SA = 2πr(r + h) = 2π × ${s.r} × ${s.r + s.h} = <b>${fmt(SA,2)}</b>`;
+    } else if (s.kind === 'cone') {
+      const slant = Math.hypot(s.r,s.h);
+      V = (1/3)*PI*s.r**2*s.h; SA = PI*s.r*(s.r+slant);
+      label = `cone r=${s.r}, h=${s.h}`;
+      howV = `V = ⅓πr²h = ⅓ × π × ${s.r}² × ${s.h} = <b>${fmt(V,2)}</b>`;
+      howSA = `slant l = √(r²+h²) = √(${s.r*s.r} + ${s.h*s.h}) = ${fmt(slant,2)}\nSA = πr(r + l) = <b>${fmt(SA,2)}</b>`;
+    } else if (s.kind === 'sphere') {
+      V = (4/3)*PI*s.r**3; SA = 4*PI*s.r**2;
+      label = `sphere r=${s.r}`;
+      howV = `V = ⁴⁄₃ πr³ = ⁴⁄₃ × π × ${s.r}³ = <b>${fmt(V,2)}</b>`;
+      howSA = `SA = 4πr² = 4 × π × ${s.r}² = <b>${fmt(SA,2)}</b>`;
+    } else if (s.kind === 'sqpyr') {
+      const slant = Math.hypot(s.a/2,s.h);
+      V = (1/3)*s.a*s.a*s.h; SA = s.a*s.a + 2*s.a*slant;
+      label = `square pyramid base=${s.a}, h=${s.h}`;
+      howV = `V = ⅓ × a² × h = ⅓ × ${s.a}² × ${s.h} = <b>${fmt(V,2)}</b>`;
+      howSA = `slant l = √((a/2)²+h²) = ${fmt(slant,2)}\nSA = a² + 2a·l = <b>${fmt(SA,2)}</b>`;
+    } else if (s.kind === 'triprism') {
+      const tri = 0.5*s.a*s.b, hyp = Math.hypot(s.a,s.b);
+      V = tri*s.c; SA = 2*tri + s.c*(s.a+s.b+hyp);
+      label = `triangular prism (legs ${s.a},${s.b}, length ${s.c})`;
+      howV = `Triangle area = ½ × ${s.a} × ${s.b} = ${fmt(tri,2)}\nV = area × L = <b>${fmt(V,2)}</b>`;
+      howSA = `2 triangles + 3 rectangles\nSA = 2(½ab) + L(a + b + √(a²+b²)) = <b>${fmt(SA,2)}</b>`;
+    }
+    if (ask === 'volume') {
+      return {
+        title: '📦 Volume',
+        text: `Find the <b>volume</b> of the ${label}.<br><span style="color:var(--muted); font-size:12px">2 d.p. · use π ≈ 3.14159</span>`,
+        answer: V, how: howV
+      };
+    } else {
+      return {
+        title: '📦 Surface area',
+        text: `Find the <b>surface area</b> of the ${label}.<br><span style="color:var(--muted); font-size:12px">2 d.p. · use π ≈ 3.14159</span>`,
+        answer: SA, how: howSA
+      };
+    }
   },
   draw() {
     clearStage();
@@ -708,6 +784,32 @@ const Shapes = {
     edges.position.y = lifted;
     stage.add(edges);
 
+    // Dimension labels (so she can see what each variable means)
+    const lab = (text, x, y, z, color = '#6ee7ff') => {
+      const sp = makeLabel(text, color);
+      sp.position.set(x, y, z);
+      stage.add(sp);
+    };
+    if (s.kind === 'cube') {
+      lab(`a = ${s.a}`, s.a / 2 + 0.4, 0.05, s.a / 2 + 0.4, '#ffd166');
+    } else if (s.kind === 'cuboid') {
+      lab(`a = ${s.a}`, 0, 0.05, s.b / 2 + 0.5, '#ffd166');
+      lab(`b = ${s.b}`, s.a / 2 + 0.5, 0.05, 0, '#7dffb0');
+      lab(`c = ${s.c}`, s.a / 2 + 0.6, s.c / 2, s.b / 2 + 0.6, '#ff7ae0');
+    } else if (s.kind === 'cylinder' || s.kind === 'cone') {
+      lab(`r = ${s.r}`, s.r + 0.4, lifted * 2 + 0.2, 0, '#ffd166');
+      lab(`h = ${s.h}`, s.r + 0.6, lifted, 0, '#ff7ae0');
+    } else if (s.kind === 'sphere') {
+      lab(`r = ${s.r}`, s.r + 0.4, lifted, 0, '#ffd166');
+    } else if (s.kind === 'sqpyr') {
+      lab(`a = ${s.a}`, 0, 0.05, s.a / 2 + 0.5, '#ffd166');
+      lab(`h = ${s.h}`, s.a / 2 + 0.6, s.h / 2, 0, '#ff7ae0');
+    } else if (s.kind === 'triprism') {
+      lab(`a = ${s.a}`, 0, 0.05, -s.c / 2 - 0.4, '#ffd166');
+      lab(`b = ${s.b}`, -s.a / 2 - 0.5, s.b / 2, -s.c / 2 - 0.4, '#7dffb0');
+      lab(`L = ${s.c}`, s.a / 2 + 0.5, 0.05, 0, '#ff7ae0');
+    }
+
     hud.innerHTML = `
       <h3>${s.kind.toUpperCase()}</h3>
       <div class="tagline">Drag sliders → watch V & SA change live.</div>
@@ -742,21 +844,41 @@ const Pyth = {
   challenge() {
     this.randomize();
     const { l, w, h } = this.state;
-    const which = pick(['space', 'angle']);
+    const which = pick(['space', 'base', 'angle', 'pyth2d']);
     if (which === 'space') {
       const D = Math.sqrt(l*l + w*w + h*h);
       return {
-        title: '📐 Pythagoras 3D',
-        text: `Cuboid with sides <b>${l} × ${w} × ${h}</b>.<br>What is the <b>space diagonal</b>?<br><span style="color:var(--muted); font-size:12px">(2 d.p.)</span>`,
-        answer: D
+        title: '📐 Space diagonal',
+        text: `Cuboid <b>${l} × ${w} × ${h}</b>.<br>Find the <b>space diagonal</b> (corner to opposite corner).<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
+        answer: D,
+        how: `D = √(l² + w² + h²)\n  = √(${l*l} + ${w*w} + ${h*h})\n  = √${l*l+w*w+h*h}\n  = <b>${fmt(D,2)}</b>`
       };
-    } else {
+    } else if (which === 'base') {
+      const d = Math.sqrt(l*l + w*w);
+      return {
+        title: '📐 Base diagonal',
+        text: `Floor of cuboid <b>${l} × ${w}</b>.<br>Find the diagonal across the base.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
+        answer: d,
+        how: `d = √(l² + w²)\n  = √(${l*l} + ${w*w})\n  = √${l*l+w*w}\n  = <b>${fmt(d,2)}</b>`
+      };
+    } else if (which === 'angle') {
       const d = Math.sqrt(l*l + w*w);
       const ang = Math.atan2(h, d) * 180 / Math.PI;
       return {
-        title: '📐 Trig in 3D',
-        text: `Cuboid <b>${l} × ${w} × ${h}</b>.<br>Angle between space diagonal and base?<br><span style="color:var(--muted); font-size:12px">(degrees, 1 d.p.)</span>`,
-        answer: ang
+        title: '📐 Angle to base',
+        text: `Cuboid <b>${l} × ${w} × ${h}</b>.<br>Angle between space diagonal and base?<br><span style="color:var(--muted); font-size:12px">degrees · 1 d.p.</span>`,
+        answer: ang,
+        how: `Step 1: base diag d = √(${l*l}+${w*w}) = ${fmt(d,2)}\nStep 2: tan θ = h ÷ d = ${h} ÷ ${fmt(d,2)}\nθ = tan⁻¹(${fmt(h/d,3)}) = <b>${fmt(ang,1)}°</b>`
+      };
+    } else {
+      // 2D Pythagoras on a single face
+      const a = pick([3, 4, 5, 6, 8]), b = pick([3, 4, 5, 6, 8]);
+      const c = Math.sqrt(a*a + b*b);
+      return {
+        title: '📐 Pythagoras 2D',
+        text: `Right triangle with legs <b>${a}</b> and <b>${b}</b>.<br>Find the <b>hypotenuse</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
+        answer: c,
+        how: `c² = a² + b² = ${a*a} + ${b*b} = ${a*a+b*b}\nc = √${a*a+b*b} = <b>${fmt(c,2)}</b>`
       };
     }
   },
@@ -795,6 +917,18 @@ const Pyth = {
     stage.add(dot(A, 0xffffff));
     stage.add(dot(B, 0xffd166));
     stage.add(dot(C, 0xff7ae0));
+
+    // Edge labels
+    const lab = (text, x, y, z, color) => {
+      const sp = makeLabel(text, color);
+      sp.position.set(x, y, z);
+      stage.add(sp);
+    };
+    lab(`l = ${l}`, 0, 0.05, -w / 2 - 0.5, '#6ee7ff');
+    lab(`w = ${w}`, l / 2 + 0.5, 0.05, 0, '#6ee7ff');
+    lab(`h = ${h}`, l / 2 + 0.5, h / 2, w / 2, '#6ee7ff');
+    lab(`d = ${fmt(baseDiag, 2)}`, 0, 0.05, w / 2 + 0.5, '#ffd166');
+    lab(`D = ${fmt(spaceDiag, 2)}`, 0, h / 2 + 0.4, 0, '#ff7ae0');
 
     hud.innerHTML = `
       <h3>PYTHAGORAS 3D</h3>
@@ -855,20 +989,50 @@ const Graph = {
     ]);
   },
   challenge() {
-    // Substitute a value into a randomly chosen expression
-    const exprs2d = [
-      { e: 'x*x', f: x => x*x, l: 'y = x²' },
-      { e: '2*x + 3', f: x => 2*x+3, l: 'y = 2x + 3' },
-      { e: 'x*x - 4*x + 3', f: x => x*x - 4*x + 3, l: 'y = x² − 4x + 3' },
-      { e: 'x*x*x', f: x => x*x*x, l: 'y = x³' },
-    ];
-    const c = pick(exprs2d);
-    const x = rnd(-3, 3);
-    return {
-      title: '📈 Substitute!',
-      text: `For <b>${c.l}</b>, find <b>y when x = ${x}</b>.`,
-      answer: c.f(x)
-    };
+    const which = pick(['sub', 'gradient', 'intercept', 'roots']);
+    if (which === 'sub') {
+      const exprs = [
+        { f: x => x*x, l: 'y = x²', step: x => `y = x² = (${x})² = <b>${x*x}</b>` },
+        { f: x => 2*x+3, l: 'y = 2x + 3', step: x => `y = 2(${x}) + 3 = ${2*x} + 3 = <b>${2*x+3}</b>` },
+        { f: x => x*x - 4*x + 3, l: 'y = x² − 4x + 3',
+          step: x => `y = (${x})² − 4(${x}) + 3 = ${x*x} − ${4*x} + 3 = <b>${x*x - 4*x + 3}</b>` },
+        { f: x => x*x*x, l: 'y = x³', step: x => `y = (${x})³ = <b>${x*x*x}</b>` },
+        { f: x => 3*x - 5, l: 'y = 3x − 5', step: x => `y = 3(${x}) − 5 = <b>${3*x - 5}</b>` },
+      ];
+      const c = pick(exprs);
+      const x = rnd(-3, 4);
+      return {
+        title: '📈 Substitute!',
+        text: `For <b>${c.l}</b>, find <b>y when x = ${x}</b>.`,
+        answer: c.f(x), how: c.step(x)
+      };
+    } else if (which === 'gradient') {
+      const m = rnd(-4, 5), c = rnd(-5, 5);
+      return {
+        title: '📈 Gradient',
+        text: `What is the <b>gradient</b> of the line <b>y = ${m}x ${c >= 0 ? '+ ' + c : '− ' + (-c)}</b>?`,
+        answer: m,
+        how: `Compare to y = mx + c → m is the gradient → <b>${m}</b>`
+      };
+    } else if (which === 'intercept') {
+      const m = rnd(-4, 5), c = rnd(-5, 5);
+      return {
+        title: '📈 y-intercept',
+        text: `What is the <b>y-intercept</b> of <b>y = ${m}x ${c >= 0 ? '+ ' + c : '− ' + (-c)}</b>?`,
+        answer: c,
+        how: `Compare to y = mx + c → c is the y-intercept → <b>${c}</b>\n(it's where the line crosses the y-axis: x = 0)`
+      };
+    } else {
+      // Roots of (x - p)(x - q) = 0 — ask for the smaller root
+      const p = rnd(-4, 4), q = rnd(-4, 4);
+      const roots = [p, q].sort((a, b) => a - b);
+      return {
+        title: '📈 Roots',
+        text: `Solve <b>(x ${p >= 0 ? '− ' + p : '+ ' + (-p)})(x ${q >= 0 ? '− ' + q : '+ ' + (-q)}) = 0</b>.<br>Give the <b>smaller</b> root.`,
+        answer: roots[0],
+        how: `Set each bracket = 0:\nx − (${p}) = 0 → x = ${p}\nx − (${q}) = 0 → x = ${q}\nSmaller root = <b>${roots[0]}</b>`
+      };
+    }
   },
   compile(expr, vars) {
     try {
@@ -1047,34 +1211,63 @@ const Trans = {
     this.build(); this.draw();
   },
   challenge() {
-    // Translate a point in 2D for simplicity (typical GCSE)
     const x = rnd(-4, 4), y = rnd(-4, 4);
     const dx = rnd(-5, 5), dy = rnd(-5, 5);
-    const which = pick(['translate', 'reflect-x', 'reflect-y', 'rotate90']);
-    if (which === 'translate') {
+    const which = pick(['translate-x','translate-y','reflect-x','reflect-y','reflect-yx','rot90cw','rot90ac','rot180','enlarge']);
+    if (which === 'translate-x') {
       return {
-        title: '🔄 Translation',
-        text: `Translate point (${x}, ${y}) by vector (${dx}, ${dy}).<br>What is the new <b>x</b>-coordinate?`,
-        answer: x + dx
+        title: '🔄 Translation', answer: x + dx,
+        text: `Translate (${x}, ${y}) by vector (${dx}, ${dy}).<br>New <b>x</b>-coordinate?`,
+        how: `x' = x + dx = ${x} + (${dx}) = <b>${x + dx}</b>`
+      };
+    } else if (which === 'translate-y') {
+      return {
+        title: '🔄 Translation', answer: y + dy,
+        text: `Translate (${x}, ${y}) by vector (${dx}, ${dy}).<br>New <b>y</b>-coordinate?`,
+        how: `y' = y + dy = ${y} + (${dy}) = <b>${y + dy}</b>`
       };
     } else if (which === 'reflect-x') {
       return {
-        title: '🔄 Reflection',
-        text: `Reflect (${x}, ${y}) in the <b>x-axis</b>.<br>What is the new <b>y</b>-coordinate?`,
-        answer: -y
+        title: '🔄 Reflect in x-axis', answer: -y,
+        text: `Reflect (${x}, ${y}) in the <b>x-axis</b>.<br>New <b>y</b>-coordinate?`,
+        how: `Reflecting in the x-axis flips y:\n(x, y) → (x, −y) → (${x}, <b>${-y}</b>)`
       };
     } else if (which === 'reflect-y') {
       return {
-        title: '🔄 Reflection',
-        text: `Reflect (${x}, ${y}) in the <b>y-axis</b>.<br>What is the new <b>x</b>-coordinate?`,
-        answer: -x
+        title: '🔄 Reflect in y-axis', answer: -x,
+        text: `Reflect (${x}, ${y}) in the <b>y-axis</b>.<br>New <b>x</b>-coordinate?`,
+        how: `Reflecting in the y-axis flips x:\n(x, y) → (−x, y) → (<b>${-x}</b>, ${y})`
+      };
+    } else if (which === 'reflect-yx') {
+      return {
+        title: '🔄 Reflect in y = x', answer: x,
+        text: `Reflect (${x}, ${y}) in the line <b>y = x</b>.<br>New <b>y</b>-coordinate?`,
+        how: `Reflecting in y = x swaps x and y:\n(x, y) → (y, x) → (${y}, <b>${x}</b>)`
+      };
+    } else if (which === 'rot90cw') {
+      return {
+        title: '🔄 Rotate 90° CW', answer: -x,
+        text: `Rotate (${x}, ${y}) <b>90° clockwise</b> about origin.<br>New <b>y</b>-coordinate?`,
+        how: `90° clockwise: (x, y) → (y, −x)\n(${x}, ${y}) → (${y}, <b>${-x}</b>)`
+      };
+    } else if (which === 'rot90ac') {
+      return {
+        title: '🔄 Rotate 90° anti-CW', answer: x,
+        text: `Rotate (${x}, ${y}) <b>90° anti-clockwise</b> about origin.<br>New <b>y</b>-coordinate?`,
+        how: `90° anti-clockwise: (x, y) → (−y, x)\n(${x}, ${y}) → (${-y}, <b>${x}</b>)`
+      };
+    } else if (which === 'rot180') {
+      return {
+        title: '🔄 Rotate 180°', answer: -x,
+        text: `Rotate (${x}, ${y}) <b>180°</b> about origin.<br>New <b>x</b>-coordinate?`,
+        how: `180° rotation: (x, y) → (−x, −y)\n(${x}, ${y}) → (<b>${-x}</b>, ${-y})`
       };
     } else {
-      // 90° clockwise about origin: (x,y) -> (y,-x)
+      const k = pick([2, 3, -1, -2]);
       return {
-        title: '🔄 Rotation 90° CW',
-        text: `Rotate (${x}, ${y}) <b>90° clockwise</b> about origin.<br>What is the new <b>y</b>-coordinate?`,
-        answer: -x
+        title: '🔄 Enlargement', answer: k * x,
+        text: `Enlarge (${x}, ${y}) by scale factor <b>${k}</b> from origin.<br>New <b>x</b>-coordinate?`,
+        how: `From origin: (x, y) → (kx, ky)\n(${x}, ${y}) → (${k}×${x}, ${k}×${y}) = (<b>${k*x}</b>, ${k*y})`
       };
     }
   },
@@ -1140,8 +1333,239 @@ const Trans = {
   }
 };
 
+// ═════════════════════════ Module: Trig (SOHCAHTOA) ═════════════════════════
+const Trig = {
+  state: { angle: 30, hyp: 5 },
+  build() {
+    controlsEl.innerHTML = '';
+    const s = this.state, redraw = () => this.draw();
+    slider('Angle θ°', 5, 85, 1, s.angle, v => { s.angle = v; redraw(); });
+    slider('Hypotenuse', 1, 8, 0.1, s.hyp, v => { s.hyp = v; redraw(); });
+    buttonRow([
+      { label: '🎲 Surprise me', onClick: () => this.randomize() },
+      { label: '🎯 Challenge me', primary: true, onClick: () => Quiz.open(this.challenge()) },
+    ]);
+  },
+  randomize() {
+    this.state.angle = rnd(15, 75, 5);
+    this.state.hyp = rnd(2, 7, 0.5);
+    this.build(); this.draw();
+  },
+  draw() {
+    clearStage();
+    const { angle, hyp } = this.state;
+    const rad = angle * Math.PI / 180;
+    const opp = hyp * Math.sin(rad);
+    const adj = hyp * Math.cos(rad);
+
+    // Vertices: A at origin (right angle pos), B at (adj, 0), C at (adj, opp)
+    // Place flat on ground (XZ plane); rotate so triangle stands upright in XY for easy view
+    const A = new THREE.Vector3(0, 0, 0);
+    const B = new THREE.Vector3(adj, 0, 0);
+    const C = new THREE.Vector3(adj, opp, 0);
+
+    const line = (p, q, color, w = 4) => {
+      const g = new THREE.BufferGeometry().setFromPoints([p, q]);
+      return new THREE.Line(g, new THREE.LineBasicMaterial({ color, linewidth: w }));
+    };
+    stage.add(line(A, B, 0x7dffb0));   // adjacent (green)
+    stage.add(line(B, C, 0xffd166));   // opposite (yellow)
+    stage.add(line(A, C, 0xff7ae0));   // hypotenuse (pink)
+
+    // Filled triangle
+    const tri = new THREE.BufferGeometry();
+    tri.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+      A.x,A.y,A.z, B.x,B.y,B.z, C.x,C.y,C.z
+    ]), 3));
+    tri.computeVertexNormals();
+    stage.add(new THREE.Mesh(tri, makeMat(0x6ee7ff, {
+      transparent: true, opacity: 0.18, side: THREE.DoubleSide
+    })));
+
+    // Right-angle marker square at B
+    const sq = 0.25;
+    const rgPts = [
+      new THREE.Vector3(B.x - sq, 0, 0),
+      new THREE.Vector3(B.x - sq, sq, 0),
+      new THREE.Vector3(B.x, sq, 0),
+    ];
+    stage.add(line(rgPts[0], rgPts[1], 0xffffff, 2));
+    stage.add(line(rgPts[1], rgPts[2], 0xffffff, 2));
+
+    // Labels
+    const lab = (text, p, color) => {
+      const sp = makeLabel(text, color);
+      sp.position.copy(p);
+      stage.add(sp);
+    };
+    lab(`Adj = ${fmt(adj,2)}`, new THREE.Vector3(adj/2, -0.4, 0), '#7dffb0');
+    lab(`Opp = ${fmt(opp,2)}`, new THREE.Vector3(adj + 0.7, opp/2, 0), '#ffd166');
+    lab(`Hyp = ${fmt(hyp,2)}`, new THREE.Vector3(adj/2 - 0.5, opp/2 + 0.3, 0), '#ff7ae0');
+    lab(`θ = ${angle}°`, new THREE.Vector3(0.6, 0.2, 0), '#ffffff');
+
+    hud.innerHTML = `
+      <h3>SOHCAHTOA</h3>
+      <div class="tagline">🟢 Adjacent · 🟡 Opposite · 🟣 Hypotenuse</div>
+      <div class="formula">SOH: sin θ = Opp / Hyp = <b>${fmt(Math.sin(rad),3)}</b></div>
+      <div class="formula">CAH: cos θ = Adj / Hyp = <b>${fmt(Math.cos(rad),3)}</b></div>
+      <div class="formula">TOA: tan θ = Opp / Adj = <b>${fmt(Math.tan(rad),3)}</b></div>
+      <div class="kv"><span>Opposite</span><span class="big">${fmt(opp,2)}</span></div>
+      <div class="kv"><span>Adjacent</span><span class="big">${fmt(adj,2)}</span></div>
+    `;
+  },
+  challenge() {
+    this.randomize();
+    const { angle, hyp } = this.state;
+    const rad = angle * Math.PI / 180;
+    const opp = hyp * Math.sin(rad), adj = hyp * Math.cos(rad);
+    const which = pick(['find-opp', 'find-adj', 'find-hyp', 'find-angle']);
+    if (which === 'find-opp') {
+      return {
+        title: '📏 Find opposite', answer: opp,
+        text: `Right triangle: angle θ = <b>${angle}°</b>, hypotenuse = <b>${fmt(hyp,2)}</b>.<br>Find the <b>opposite</b> side.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
+        how: `SOH → sin θ = Opp / Hyp\nOpp = Hyp × sin θ = ${fmt(hyp,2)} × sin(${angle}°)\n  = ${fmt(hyp,2)} × ${fmt(Math.sin(rad),4)} = <b>${fmt(opp,2)}</b>`
+      };
+    } else if (which === 'find-adj') {
+      return {
+        title: '📏 Find adjacent', answer: adj,
+        text: `θ = <b>${angle}°</b>, hypotenuse = <b>${fmt(hyp,2)}</b>.<br>Find the <b>adjacent</b> side.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
+        how: `CAH → cos θ = Adj / Hyp\nAdj = Hyp × cos θ = ${fmt(hyp,2)} × cos(${angle}°)\n  = ${fmt(hyp,2)} × ${fmt(Math.cos(rad),4)} = <b>${fmt(adj,2)}</b>`
+      };
+    } else if (which === 'find-hyp') {
+      return {
+        title: '📏 Find hypotenuse', answer: hyp,
+        text: `θ = <b>${angle}°</b>, opposite = <b>${fmt(opp,2)}</b>.<br>Find the <b>hypotenuse</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
+        how: `SOH → sin θ = Opp / Hyp  →  Hyp = Opp / sin θ\n  = ${fmt(opp,2)} / sin(${angle}°)\n  = ${fmt(opp,2)} / ${fmt(Math.sin(rad),4)} = <b>${fmt(hyp,2)}</b>`
+      };
+    } else {
+      return {
+        title: '📏 Find angle', answer: angle,
+        text: `Opposite = <b>${fmt(opp,2)}</b>, adjacent = <b>${fmt(adj,2)}</b>.<br>Find <b>θ</b>.<br><span style="color:var(--muted); font-size:12px">degrees · 1 d.p.</span>`,
+        how: `TOA → tan θ = Opp / Adj = ${fmt(opp,2)} / ${fmt(adj,2)}\n  = ${fmt(opp/adj,4)}\nθ = tan⁻¹(${fmt(opp/adj,4)}) = <b>${fmt(angle,1)}°</b>`
+      };
+    }
+  }
+};
+
+// ═════════════════════════ Module: Circles & Sectors ═════════════════════════
+const Circ = {
+  state: { r: 3, theta: 90 },
+  build() {
+    controlsEl.innerHTML = '';
+    const s = this.state, redraw = () => this.draw();
+    slider('Radius r', 0.5, 5, 0.1, s.r, v => { s.r = v; redraw(); });
+    slider('Sector angle θ°', 0, 360, 1, s.theta, v => { s.theta = v; redraw(); });
+    buttonRow([
+      { label: '🎲 Surprise me', onClick: () => this.randomize() },
+      { label: '🎯 Challenge me', primary: true, onClick: () => Quiz.open(this.challenge()) },
+    ]);
+  },
+  randomize() {
+    this.state.r = rnd(1, 5, 0.5);
+    this.state.theta = rnd(30, 330, 15);
+    this.build(); this.draw();
+  },
+  draw() {
+    clearStage();
+    const { r, theta } = this.state;
+    const rad = theta * Math.PI / 180;
+    const C = 2 * Math.PI * r;
+    const A = Math.PI * r * r;
+    const arc = (theta / 360) * C;
+    const sectorA = (theta / 360) * A;
+
+    // Full circle (faint)
+    const ringG = new THREE.RingGeometry(r * 0.998, r, 96);
+    const ring = new THREE.Mesh(ringG, makeMat(0x6ee7ff, { side: THREE.DoubleSide }));
+    ring.rotation.x = -Math.PI / 2;
+    stage.add(ring);
+    // Disc faint
+    const discG = new THREE.CircleGeometry(r, 96);
+    const disc = new THREE.Mesh(discG, makeMat(0x6ee7ff, {
+      transparent: true, opacity: 0.1, side: THREE.DoubleSide
+    }));
+    disc.rotation.x = -Math.PI / 2;
+    stage.add(disc);
+
+    // Sector highlight
+    if (theta > 0) {
+      const segs = Math.max(2, Math.round(96 * theta / 360));
+      const sectorG = new THREE.CircleGeometry(r, segs, 0, rad);
+      const sector = new THREE.Mesh(sectorG, makeMat(0xff7ae0, {
+        transparent: true, opacity: 0.55, side: THREE.DoubleSide
+      }));
+      sector.rotation.x = -Math.PI / 2;
+      stage.add(sector);
+
+      // Two radii
+      const line = (p, q, color) => {
+        const g = new THREE.BufferGeometry().setFromPoints([p, q]);
+        return new THREE.Line(g, new THREE.LineBasicMaterial({ color, linewidth: 3 }));
+      };
+      stage.add(line(new THREE.Vector3(0, 0.01, 0), new THREE.Vector3(r, 0.01, 0), 0xffd166));
+      stage.add(line(new THREE.Vector3(0, 0.01, 0),
+        new THREE.Vector3(r * Math.cos(rad), 0.01, -r * Math.sin(rad)), 0xffd166));
+    }
+
+    // Labels
+    const lab = (text, x, y, z, color) => {
+      const sp = makeLabel(text, color);
+      sp.position.set(x, y, z);
+      stage.add(sp);
+    };
+    lab(`r = ${fmt(r,2)}`, r / 2, 0.05, 0.4, '#ffd166');
+    lab(`θ = ${theta}°`, 0.4, 0.05, -0.4, '#ff7ae0');
+
+    hud.innerHTML = `
+      <h3>CIRCLE & SECTOR</h3>
+      <div class="tagline">Pink slice = sector for angle θ</div>
+      <div class="kv"><span>Circumference</span><span class="big">${fmt(C,2)}</span></div>
+      <div class="formula">C = 2πr = 2 × π × ${fmt(r,2)}</div>
+      <div class="kv"><span>Area</span><span class="big">${fmt(A,2)}</span></div>
+      <div class="formula">A = πr² = π × ${fmt(r,2)}²</div>
+      <div class="kv"><span>Arc length</span><span class="v">${fmt(arc,2)}</span></div>
+      <div class="formula">arc = (θ/360) × 2πr</div>
+      <div class="kv"><span>Sector area</span><span class="v">${fmt(sectorA,2)}</span></div>
+      <div class="formula">sector = (θ/360) × πr²</div>
+    `;
+  },
+  challenge() {
+    this.randomize();
+    const { r, theta } = this.state;
+    const PI = Math.PI;
+    const C = 2 * PI * r, A = PI * r * r;
+    const arc = (theta / 360) * C, sec = (theta / 360) * A;
+    const which = pick(['circ', 'area', 'arc', 'sector']);
+    if (which === 'circ') {
+      return {
+        title: '⭕ Circumference', answer: C,
+        text: `Circle with radius <b>${fmt(r,2)}</b>.<br>Find the <b>circumference</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p. · π = 3.14159</span>`,
+        how: `C = 2πr = 2 × π × ${fmt(r,2)}\n  = ${fmt(2*r,2)}π = <b>${fmt(C,2)}</b>`
+      };
+    } else if (which === 'area') {
+      return {
+        title: '⭕ Area', answer: A,
+        text: `Circle with radius <b>${fmt(r,2)}</b>.<br>Find the <b>area</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
+        how: `A = πr² = π × ${fmt(r,2)}² = ${fmt(r*r,2)}π = <b>${fmt(A,2)}</b>`
+      };
+    } else if (which === 'arc') {
+      return {
+        title: '⭕ Arc length', answer: arc,
+        text: `Sector: r = <b>${fmt(r,2)}</b>, θ = <b>${theta}°</b>.<br>Find the <b>arc length</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
+        how: `arc = (θ/360) × 2πr\n  = (${theta}/360) × 2π × ${fmt(r,2)}\n  = ${fmt(theta/360,3)} × ${fmt(C,2)} = <b>${fmt(arc,2)}</b>`
+      };
+    } else {
+      return {
+        title: '⭕ Sector area', answer: sec,
+        text: `Sector: r = <b>${fmt(r,2)}</b>, θ = <b>${theta}°</b>.<br>Find the <b>sector area</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
+        how: `sector = (θ/360) × πr²\n  = (${theta}/360) × π × ${fmt(r,2)}²\n  = ${fmt(theta/360,3)} × ${fmt(A,2)} = <b>${fmt(sec,2)}</b>`
+      };
+    }
+  }
+};
+
 // ───────────────────────── Tab routing ─────────────────────────
-const modules = { shapes: Shapes, pyth: Pyth, graph: Graph, trans: Trans };
+const modules = { shapes: Shapes, pyth: Pyth, graph: Graph, trans: Trans, trig: Trig, circ: Circ };
 let active = 'shapes';
 function activate(name) {
   active = name;
