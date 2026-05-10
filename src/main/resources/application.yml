@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: sdlc-factory
+  threads:
+    virtual:
+      enabled: true
+
+factory:
+  workspace-root: ${FACTORY_WORKSPACE:./workspace}
+  model: ${ANTHROPIC_MODEL:claude-sonnet-4-6}
+  max-iterations:
+    default: 3
+    coding: 5
+  max-tokens: 8192
+  # Hard cap on agentic tool-use turns within a single executor invocation.
+  max-tool-turns:
+    default: 30
+    coding: 200
+
+logging:
+  level:
+    com.example.sdlcfactory: INFO

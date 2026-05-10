@@ -1,0 +1,25 @@
+target/
+*.class
+*.jar
+
+# Spring Boot
+HELP.md
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# Runtime
+workspace/
+logs/
+*.log
+
+# Env
+.env
