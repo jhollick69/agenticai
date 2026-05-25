@@ -54,12 +54,12 @@ export default async function AccountPage({
           {searchParams.upgrade === "1" && (
             <p className="msg">That topic is Premium — unlock everything below.</p>
           )}
-          <h2 style={{ fontSize: 18, marginTop: 18 }}>Go Premium ✦</h2>
+          <h2 style={{ fontSize: 18, marginTop: 18 }}>Start your 7-day free trial ✦</h2>
           <ul className="perks">
             <li>All topics &amp; every question</li>
             <li>Concept explainers, deeper dives and analogies</li>
             <li>Unlimited 50/50 lifelines</li>
-            <li>Cancel anytime</li>
+            <li>7 days free, then cancel anytime</li>
           </ul>
           <UpgradeButtons />
           <div className="actions">

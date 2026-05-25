@@ -55,7 +55,13 @@ export async function POST(req: Request) {
     success_url: `${origin}/account?status=success`,
     cancel_url: `${origin}/account?status=cancel`,
     metadata: { supabase_user_id: user.id },
-    subscription_data: { metadata: { supabase_user_id: user.id } },
+    subscription_data: {
+      // 7-day free trial: the card is collected now but not charged until the trial
+      // ends. Stripe fires customer.subscription.created with status "trialing", which
+      // our webhook treats as premium — so trial users get full access immediately.
+      trial_period_days: 7,
+      metadata: { supabase_user_id: user.id },
+    },
   });
 
   return NextResponse.json({ url: session.url });

@@ -38,6 +38,10 @@ export default function UpgradeButtons() {
           <div className="per">{busy === "annual" ? "Redirecting…" : "per year · save 35%"}</div>
         </button>
       </div>
+      <p className="note">
+        ✦ Both plans start with a <strong>7-day free trial</strong>. Cancel any time before it ends
+        and you won&apos;t be charged.
+      </p>
       {error && <p className="msg bad">{error}</p>}
     </div>
   );

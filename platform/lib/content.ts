@@ -1,10 +1,10 @@
 // Quiz content. `free` topics are public; the rest require an active subscription.
 //
-// NOTE: this is a representative subset (2 questions per topic) to keep the scaffold
-// focused on the paywall plumbing. The full 70-question bank lives in the prototype
-// (../index.html, the `CONTENT` array). For production you'd migrate this into the
-// database (a `questions` table) so content is editable without a redeploy and so
-// premium questions are fetched per-request behind the entitlement check.
+// This is the full question bank (ported from the prototype ../index.html). For
+// production you'd likely move this into the database (a `questions` table) so
+// content is editable without a redeploy and premium questions are fetched
+// per-request behind the entitlement check. Authoring rule: write the CORRECT
+// answer first (correct: 0); options are shuffled at render time.
 
 export type Question = {
   q: string;
@@ -35,20 +35,75 @@ export const TOPICS: Topic[] = [
         options: ["5/8", "5/16", "1/8", "6/8"],
         correct: 0,
         concept:
-          "To add fractions with the same denominator, add the tops and keep the bottom the same.",
+          "To add fractions with the same denominator (bottom number), just add the tops and keep the bottom the same.",
         deeper:
-          "The denominator counts how many equal slices the whole is cut into; it doesn't change when you combine same-size pieces. 3 eighths + 2 eighths = 5 eighths.",
+          "The denominator tells you how many equal slices the whole is cut into; it doesn't change when you combine pieces of the same size. So 3 eighths + 2 eighths = 5 eighths. If the bottoms were different, you'd rewrite them over a common denominator first, e.g. 1/2 + 1/3 = 3/6 + 2/6 = 5/6.",
         analogy:
-          "Slices are slices. Eat 3 then 2 of a pizza cut into 8 and that's 5 slices gone — you don't recount how many slices it was cut into.",
+          "Slices are slices. If a pizza is cut into 8 and you eat 3 then 2, that's 5 slices gone. You don't suddenly recount how many slices the pizza was cut into.",
       },
       {
         q: "What is 2/3 of 18?",
         options: ["12", "6", "9", "27"],
         correct: 0,
+        concept: "To find a fraction of a number: divide by the bottom, then multiply by the top.",
+        deeper:
+          "Split 18 into equal parts: 18 ÷ 3 = 6 (that's one third). Two thirds = 2 × 6 = 12. In general, a/b of N = (N ÷ b) × a.",
+        analogy:
+          "Imagine 18 sweets shared into 3 equal piles (6 each). 'Two thirds' means you grab 2 of those piles = 12 sweets.",
+      },
+      {
+        q: "Which fraction is the same as 1/2?",
+        options: ["4/8", "2/3", "3/8", "5/9"],
+        correct: 0,
         concept:
-          "To find a fraction of a number: divide by the bottom, then multiply by the top.",
-        deeper: "18 ÷ 3 = 6 (one third), then × 2 = 12. In general a/b of N = (N ÷ b) × a.",
-        analogy: "18 sweets in 3 equal piles (6 each); grab two piles = 12.",
+          "Equivalent fractions are equal in value — you make them by multiplying (or dividing) top and bottom by the same number.",
+        deeper:
+          "1/2 = 2/4 = 4/8 = 50/100. Multiplying top and bottom by 4 gives 4/8, and 4 ÷ 8 = 0.5 = 1/2. To check if two fractions match, cross-multiply: 1×8 = 2×4 ✓.",
+        analogy:
+          "Cutting a cake into 2 and taking 1 piece is the same amount as cutting it into 8 and taking 4. Same cake, just sliced more finely.",
+      },
+      {
+        q: "Work out 3/4 − 1/2.",
+        options: ["1/4", "2/2", "1/2", "2/6"],
+        correct: 0,
+        concept:
+          "To add or subtract fractions, make the denominators match first, then work with the tops.",
+        deeper:
+          "1/2 = 2/4, so 3/4 − 2/4 = 1/4. The common denominator is the smallest number both bottoms divide into (here, 4). Never subtract the bottoms — that's how people wrongly get 2/6.",
+        analogy:
+          "You can't fairly compare quarters with halves until the pieces are the same size. Turn the half into 2 quarters, then it's just 3 quarters take away 2 quarters = 1 quarter.",
+      },
+      {
+        q: "Work out 1/2 × 1/3.",
+        options: ["1/6", "2/5", "1/5", "3/2"],
+        correct: 0,
+        concept:
+          "To multiply fractions, multiply the tops together and the bottoms together — no common denominator needed.",
+        deeper:
+          "1/2 × 1/3 = (1×1)/(2×3) = 1/6. Multiplying by a fraction makes the result smaller, because you're taking a fraction OF a fraction. The word 'of' means multiply: half of a third is a sixth.",
+        analogy:
+          "Take a third of a chocolate bar, then keep just half of THAT piece. You're left with a small chunk — one sixth of the whole bar.",
+      },
+      {
+        q: "Convert 7/4 to a mixed number.",
+        options: ["1 3/4", "1 1/4", "3/4", "2 1/4"],
+        correct: 0,
+        concept:
+          "A top-heavy (improper) fraction becomes a mixed number when you divide the top by the bottom.",
+        deeper:
+          "7 ÷ 4 = 1 remainder 3, so 7/4 = 1 whole and 3/4 left over = 1 3/4. The remainder (3) becomes the new top, sitting over the same bottom (4).",
+        analogy:
+          "If pizzas are cut into quarters and you have 7 quarter-slices, that's one whole pizza (4 slices) with 3 slices spare — 1 and three-quarter pizzas.",
+      },
+      {
+        q: "What is 1/4 as a decimal?",
+        options: ["0.25", "0.4", "1.4", "0.14"],
+        correct: 0,
+        concept: "A fraction is really a division — to get a decimal, divide the top by the bottom.",
+        deeper:
+          "1/4 means 1 ÷ 4 = 0.25. Worth memorising: 1/2 = 0.5, 1/4 = 0.25, 3/4 = 0.75, 1/10 = 0.1. These also link to percentages (0.25 = 25%).",
+        analogy:
+          "A quarter of £1 is 25p, written £0.25. The fraction and the decimal are just two ways of writing the same amount.",
       },
     ],
   },
@@ -62,18 +117,74 @@ export const TOPICS: Topic[] = [
         q: "A £40 hoodie has 25% off. How much money do you save?",
         options: ["£10", "£15", "£30", "£25"],
         correct: 0,
-        concept: "A percentage is a fraction out of 100. 'Per cent' means 'per hundred'.",
-        deeper: "25% = 1/4, so 25% of £40 = £40 ÷ 4 = £10. The sale price would be £30.",
+        concept: "A percentage is just a fraction out of 100. 'Per cent' literally means 'per hundred'.",
+        deeper:
+          "25% = 25/100 = 1/4. So 25% of £40 = £40 ÷ 4 = £10. The sale price would be £40 − £10 = £30. For any percentage: divide by 100 then multiply by the percent, i.e. 40 ÷ 100 × 25 = 10.",
         analogy:
-          "25% means '£25 saved for every £100'. £40 is 0.4 of £100, so you save 0.4 × £25 = £10.",
+          "Percent means 'out of every 100'. 25% says 'for every £100 you'd save £25'. £40 is 0.4 of £100, so you save 0.4 × £25 = £10.",
       },
       {
         q: "What is 10% of 250?",
         options: ["25", "2.5", "250", "50"],
         correct: 0,
-        concept: "Finding 10% is easy — divide by 10.",
-        deeper: "10% = 1/10, so 250 ÷ 10 = 25. From 10% you can build others: 5% = 12.5, 20% = 50.",
-        analogy: "Slice into 10 equal bits and take one: 250 → 25 in each pile.",
+        concept:
+          "Finding 10% is easy — just divide by 10 (move the decimal point one place to the left).",
+        deeper:
+          "10% = 1/10, so 10% of 250 = 250 ÷ 10 = 25. Handy trick: once you have 10% you can build others — 5% is half of it (12.5), 20% is double (50), 30% is triple (75).",
+        analogy:
+          "10% is like slicing something into 10 equal bits and taking one. 250 split into 10 piles = 25 in each pile.",
+      },
+      {
+        q: "A phone costs £200 and goes up by 15%. What's the new price?",
+        options: ["£230", "£215", "£30", "£300"],
+        correct: 0,
+        concept: "For a percentage increase, work out the increase and add it on (or use a multiplier).",
+        deeper:
+          "15% of £200 = 0.15 × 200 = £30. New price = £200 + £30 = £230. Faster way: a 15% rise means paying 115% = ×1.15, so 200 × 1.15 = £230 in one step.",
+        analogy:
+          "Adding 15% is like a tip on a restaurant bill — you keep the original 100% and pile a bit more on top.",
+      },
+      {
+        q: "In a test you scored 18 out of 24. What's that as a percentage?",
+        options: ["75%", "60%", "80%", "72%"],
+        correct: 0,
+        concept: "To turn a score into a percentage, divide the part by the total, then multiply by 100.",
+        deeper:
+          "18 ÷ 24 = 0.75, and 0.75 × 100 = 75%. You can also simplify first: 18/24 = 3/4 = 75%. The 'out of' number is always the one you divide by.",
+        analogy:
+          "It's like rescaling your score onto a 'per 100' ruler so any test compares fairly — 18 out of 24 is the same standard as 75 out of 100.",
+      },
+      {
+        q: "A jacket was £80 and is reduced by 20%. What is the sale price?",
+        options: ["£64", "£60", "£16", "£72"],
+        correct: 0,
+        concept:
+          "For a percentage decrease, find the reduction and subtract it (or multiply by the leftover percentage).",
+        deeper:
+          "20% of £80 = 0.2 × 80 = £16. Sale price = £80 − £16 = £64. Quicker: paying 80% (that's 100% − 20%) means ×0.8, so 80 × 0.8 = £64.",
+        analogy:
+          "Knocking 20% off means you still pay the other 80%. The price loses a fifth of itself — £80 drops by £16 to £64.",
+      },
+      {
+        q: "Write 0.6 as a percentage.",
+        options: ["60%", "6%", "0.6%", "600%"],
+        correct: 0,
+        concept:
+          "To turn a decimal into a percentage, multiply by 100 (move the decimal point two places right).",
+        deeper:
+          "0.6 × 100 = 60%. Decimals, fractions and percentages are interchangeable: 0.6 = 6/10 = 3/5 = 60%. Moving the point two places is the same as ×100.",
+        analogy:
+          "0.6 of something is 6 tenths, and 6 tenths is the same as 60 hundredths — and 'per cent' just means 'per hundred', so 60%.",
+      },
+      {
+        q: "There are 30 students and 40% wear glasses. How many wear glasses?",
+        options: ["12", "10", "15", "20"],
+        correct: 0,
+        concept: "Find a percentage of an amount by converting to a decimal (or fraction) and multiplying.",
+        deeper:
+          "40% = 0.4, so 0.4 × 30 = 12. Or use 10% = 3, then 40% = 4 × 3 = 12. Building up from 10% is often the easiest mental route.",
+        analogy:
+          "10% of the class is 3 students. 40% is just four of those tenths: 3 + 3 + 3 + 3 = 12.",
       },
     ],
   },
@@ -87,17 +198,71 @@ export const TOPICS: Topic[] = [
         q: "Share £60 in the ratio 2:3. How much is the bigger share?",
         options: ["£36", "£24", "£30", "£40"],
         correct: 0,
-        concept: "Add the parts to find total shares, find one share, then scale up.",
-        deeper: "2:3 → 5 parts. £60 ÷ 5 = £12 per part. Shares are £24 and £36 (sum £60 ✓).",
-        analogy: "5 buckets; fill 2 for one person, 3 for the other. £12 in each — the bigger gets £36.",
+        concept: "For ratio sharing: add the parts to find the total shares, find one share, then scale up.",
+        deeper:
+          "2:3 means 5 equal parts in total. £60 ÷ 5 = £12 per part. The shares are 2 × 12 = £24 and 3 × 12 = £36 (check: 24 + 36 = 60 ✓). The bigger share is £36.",
+        analogy:
+          "Picture 5 identical buckets. The ratio says fill 2 for one person and 3 for the other. Pour £60 evenly across all 5 (£12 each), then hand over the buckets.",
+      },
+      {
+        q: "A recipe mixes flour and sugar in the ratio 3:1. With 9 cups of flour, how much sugar?",
+        options: ["3 cups", "1 cup", "9 cups", "6 cups"],
+        correct: 0,
+        concept: "Keep a ratio in proportion — whatever you multiply one side by, multiply the other by the same.",
+        deeper:
+          "3:1 with 9 cups of flour: 9 ÷ 3 = 3, so each 'part' is 3 cups. Sugar is 1 part = 3 cups. The amounts become 9:3, which simplifies back to 3:1 ✓.",
+        analogy:
+          "A ratio is a recipe rule. If you triple the flour, you must triple everything else to keep the taste the same — scale it all together.",
       },
       {
         q: "Simplify the ratio 12:18.",
         options: ["2:3", "6:9", "3:2", "4:6"],
         correct: 0,
-        concept: "Divide both sides by their highest common factor.",
-        deeper: "HCF of 12 and 18 is 6. 12 ÷ 6 = 2, 18 ÷ 6 = 3 → 2:3.",
-        analogy: "Like reducing a fraction: 12/18 and 2/3 say the same thing, simplest form.",
+        concept: "Simplify a ratio by dividing both sides by their highest common factor.",
+        deeper:
+          "The biggest number dividing both 12 and 18 is 6. 12 ÷ 6 = 2 and 18 ÷ 6 = 3, giving 2:3. (6:9 and 4:6 are smaller but not fully simplified; 3:2 has the order flipped.)",
+        analogy:
+          "It's like reducing a fraction to lowest terms — 12/18 and 2/3 describe the same relationship, just said in the simplest way.",
+      },
+      {
+        q: "Blue and red counters are in the ratio 5:2. There are 35 counters in total. How many are red?",
+        options: ["10", "25", "14", "7"],
+        correct: 0,
+        concept: "Find the total parts, divide the total amount to get one part, then multiply for the bit you want.",
+        deeper:
+          "5:2 → 7 parts. 35 ÷ 7 = 5 counters per part. Red = 2 parts = 2 × 5 = 10 (and blue = 25; 10 + 25 = 35 ✓).",
+        analogy: "Same bucket idea: 7 buckets with 5 counters each. Red gets 2 buckets = 10 counters.",
+      },
+      {
+        q: "A map scale is 1:100. A wall is 5 cm on the map. How long is it in real life?",
+        options: ["500 cm", "105 cm", "20 cm", "50 cm"],
+        correct: 0,
+        concept:
+          "A scale ratio tells you how many real units each map unit represents — multiply to go from map to real life.",
+        deeper:
+          "1:100 means 1 cm on the map = 100 cm in reality. So 5 cm × 100 = 500 cm (5 m). To go the other way (real to map), you'd divide by 100.",
+        analogy:
+          "It's a shrink ratio. The map shrank everything 100 times to fit on paper, so to get the true size you blow each measurement back up by 100.",
+      },
+      {
+        q: "Simplify the ratio 4:6:8.",
+        options: ["2:3:4", "1:2:3", "2:3:5", "1:3:4"],
+        correct: 0,
+        concept: "Simplify a three-part ratio the same way — divide every part by their common factor.",
+        deeper:
+          "The highest number dividing 4, 6 and 8 is 2. 4÷2=2, 6÷2=3, 8÷2=4, giving 2:3:4. Every part must be divided by the same number to keep the ratio fair.",
+        analogy:
+          "Like resizing a recipe down evenly — halve every ingredient and the dish tastes identical, just smaller amounts.",
+      },
+      {
+        q: "Paint is mixed red:white in the ratio 1:4. You use 2 litres of red. How much white?",
+        options: ["8 litres", "4 litres", "2 litres", "6 litres"],
+        correct: 0,
+        concept: "Scale both sides of the ratio by the same factor to keep the mix the same.",
+        deeper:
+          "1:4 with 2 litres of red: one part = 2 litres, so white = 4 parts = 4 × 2 = 8 litres. The mix becomes 2:8, which simplifies back to 1:4 ✓.",
+        analogy:
+          "The ratio is the colour recipe. Double the red and you must double the white too, or the shade changes.",
       },
     ],
   },
@@ -111,17 +276,80 @@ export const TOPICS: Topic[] = [
         q: "Solve: 2x + 5 = 13. What is x?",
         options: ["4", "9", "6", "3"],
         correct: 0,
-        concept: "Do the same to both sides until the letter is alone.",
-        deeper: "Subtract 5: 2x = 8. Divide by 2: x = 4. Check: 2(4) + 5 = 13 ✓.",
-        analogy: "An equation is a balanced see-saw — peel away +5 then ×2 to leave x.",
+        concept: "Solve an equation by doing the same thing to both sides until the letter is on its own.",
+        deeper:
+          "Start with 2x + 5 = 13. Subtract 5 from both sides: 2x = 8. Divide both sides by 2: x = 4. Check by putting it back: 2(4) + 5 = 13 ✓. Always undo the operations in reverse order.",
+        analogy:
+          "An equation is a balanced see-saw. Whatever you take off one side you must take off the other or it tips. Peel away the +5, then the ×2, to leave x alone.",
       },
       {
         q: "Expand: 3(x + 4).",
         options: ["3x + 12", "3x + 4", "x + 12", "3x + 7"],
         correct: 0,
-        concept: "Multiply everything inside the bracket by the term outside.",
-        deeper: "3 × x + 3 × 4 = 3x + 12. The 3 touches BOTH terms — forgetting the second gives 3x + 4.",
-        analogy: "3 meal deals, each a burger (x) and a £4 drink → 3 burgers + three £4 drinks.",
+        concept: "To expand brackets, multiply everything inside the bracket by the term outside.",
+        deeper:
+          "3(x + 4) means 3 × x plus 3 × 4 = 3x + 12. The number outside touches BOTH terms inside — forgetting the second one (giving 3x + 4) is the most common slip.",
+        analogy:
+          "3(x + 4) is like buying 3 identical meal deals, each with a burger (x) and a £4 drink. Three burgers and three £4 drinks = 3x + 12.",
+      },
+      {
+        q: "Simplify: 5a + 3a − 2a.",
+        options: ["6a", "10a", "6a³", "0"],
+        correct: 0,
+        concept: "You can only add or subtract 'like terms' — terms with exactly the same letter part.",
+        deeper:
+          "5a + 3a − 2a: just combine the number coefficients, 5 + 3 − 2 = 6, and keep the a, giving 6a. The letter stays the same and the powers don't add — that's why it isn't 6a³.",
+        analogy:
+          "Think of 'a' as apples. 5 apples + 3 apples − 2 apples = 6 apples. You'd never call them 'apples cubed' just for adding them up.",
+      },
+      {
+        q: "Solve: x ÷ 3 = 7. What is x?",
+        options: ["21", "10", "4", "2.3"],
+        correct: 0,
+        concept: "To undo a division, do the opposite — multiply both sides.",
+        deeper:
+          "x ÷ 3 = 7 means x divided by 3 is 7. Multiply both sides by 3: x = 21. Check: 21 ÷ 3 = 7 ✓.",
+        analogy:
+          "If splitting your money into 3 equal piles gives £7 each, then you started with 3 lots of £7 = £21. Just reverse the sharing.",
+      },
+      {
+        q: "Factorise: 6x + 9.",
+        options: ["3(2x + 3)", "6(x + 9)", "3(2x + 9)", "3(6x + 3)"],
+        correct: 0,
+        concept:
+          "Factorising is the reverse of expanding — take out the highest common factor and put it outside a bracket.",
+        deeper:
+          "The highest number dividing both 6 and 9 is 3. 6x ÷ 3 = 2x and 9 ÷ 3 = 3, so 6x + 9 = 3(2x + 3). Check by expanding: 3 × 2x + 3 × 3 = 6x + 9 ✓.",
+        analogy:
+          "It's like noticing every item on a receipt was bought in 3s, so you pull out the 'times 3' and write it once outside the bracket.",
+      },
+      {
+        q: "Solve: 5x = 35. What is x?",
+        options: ["7", "30", "40", "175"],
+        correct: 0,
+        concept: "When a number multiplies the letter, divide both sides by that number to free the letter.",
+        deeper:
+          "5x = 35 means 5 times x. Divide both sides by 5: x = 7. Check: 5 × 7 = 35 ✓. Dividing undoes multiplying.",
+        analogy: "If 5 identical bags weigh 35 kg altogether, each bag is 35 ÷ 5 = 7 kg.",
+      },
+      {
+        q: "What is the value of 3x + 2 when x = 4?",
+        options: ["14", "9", "18", "24"],
+        correct: 0,
+        concept: "Substituting means replacing the letter with its number value, then working it out.",
+        deeper:
+          "3x + 2 with x = 4: 3 × 4 = 12, then + 2 = 14. Do the multiplication before the addition (order of operations / BIDMAS).",
+        analogy:
+          "The letter x is a placeholder, like an empty slot. Drop the value 4 into the slot and the expression becomes an ordinary sum.",
+      },
+      {
+        q: "Solve: x − 7 = 10. What is x?",
+        options: ["17", "3", "70", "-3"],
+        correct: 0,
+        concept: "To undo a subtraction, add the same number to both sides.",
+        deeper:
+          "x − 7 = 10. Add 7 to both sides: x = 17. Check: 17 − 7 = 10 ✓. Whatever's being done to x, do the opposite to both sides.",
+        analogy: "You spent £7 and have £10 left. To find what you started with, add the £7 back on: £17.",
       },
     ],
   },
@@ -135,17 +363,71 @@ export const TOPICS: Topic[] = [
         q: "You roll a fair 6-sided dice. What's the probability of getting a 4?",
         options: ["1/6", "1/4", "4/6", "1/2"],
         correct: 0,
-        concept: "Probability = ways you want ÷ total equally likely outcomes.",
-        deeper: "6 equally likely faces, one is a 4, so P(4) = 1/6 ≈ 0.167.",
-        analogy: "Six doors, one prize, all equal — 1 in 6 first go.",
+        concept: "Probability = (ways to get what you want) ÷ (total number of equally likely outcomes).",
+        deeper:
+          "A dice has 6 equally likely faces. Only one of them is a '4', so P(4) = 1/6 ≈ 0.167. The number on the face doesn't matter — the chance of any single number is 1/6.",
+        analogy:
+          "Six doors, a prize behind exactly one, all equally likely. Your chance of picking the right door first go is 1 in 6.",
       },
       {
-        q: "The probability it rains is 0.3. What's the probability it does NOT rain?",
+        q: "A bag has 3 red and 7 blue balls. What's the probability of picking a red one?",
+        options: ["3/10", "3/7", "7/10", "1/3"],
+        correct: 0,
+        concept: "Probability of an event = favourable outcomes over the total number of outcomes.",
+        deeper:
+          "Total balls = 3 + 7 = 10. Reds = 3, so P(red) = 3/10 = 0.3. The total is 10, not 7 — you must count everything in the bag, not just the other colour.",
+        analogy:
+          "If 3 out of every 10 raffle tickets are winners, your chance of grabbing a winner in one go is 3/10.",
+      },
+      {
+        q: "The probability that it rains tomorrow is 0.3. What's the probability it does NOT rain?",
         options: ["0.7", "0.3", "1.3", "0.07"],
         correct: 0,
-        concept: "An event and its opposite cover everything, so they sum to 1.",
-        deeper: "P(not rain) = 1 − 0.3 = 0.7.",
-        analogy: "If 30% of tomorrows are rainy, the other 70% must be dry.",
+        concept: "An event happening or not happening covers everything, so the two probabilities add up to 1.",
+        deeper:
+          "P(not rain) = 1 − P(rain) = 1 − 0.3 = 0.7. Probabilities run from 0 (impossible) to 1 (certain), and an event plus its opposite must cover all possibilities, so they total 1.",
+        analogy:
+          "Rain or no-rain covers 100% of tomorrows. If 30% are rainy, the other 70% must be dry — there's nothing else left to be.",
+      },
+      {
+        q: "A spinner has 4 equal sections: 2 green, 1 yellow, 1 pink. What's the probability of green?",
+        options: ["1/2", "1/4", "2/3", "1/3"],
+        correct: 0,
+        concept: "When outcomes are equally likely, count the favourable sections over the total sections.",
+        deeper:
+          "4 equal sections, 2 of them green, so P(green) = 2/4 = 1/2 = 0.5. Equal-sized sections is the key — if they were different sizes you couldn't just count them.",
+        analogy:
+          "Half the spinner is green, so over loads of spins you'd expect green about half the time — like flipping a coin.",
+      },
+      {
+        q: "P(win) on a game is 1/5. Out of 100 plays, how many wins would you expect?",
+        options: ["20", "5", "100", "80"],
+        correct: 0,
+        concept: "Expected number of times = probability × number of trials.",
+        deeper:
+          "P(win) = 1/5 over 100 plays: 1/5 × 100 = 20 expected wins. 'Expected' is a long-run average — you won't get exactly 20 every time, but it's the best prediction.",
+        analogy:
+          "If 1 in every 5 lucky-dip tickets wins, then out of 100 tickets you'd expect about 100 ÷ 5 = 20 winners.",
+      },
+      {
+        q: "A fair coin is flipped twice. What's the probability of getting two heads?",
+        options: ["1/4", "1/2", "2/2", "1/3"],
+        correct: 0,
+        concept: "For two independent events both happening, multiply their probabilities.",
+        deeper:
+          "P(head) = 1/2 each time, and the flips don't affect each other. P(head AND head) = 1/2 × 1/2 = 1/4. The four equally likely outcomes are HH, HT, TH, TT — only one is HH.",
+        analogy:
+          "Each flip is a fork in the road with 2 paths. Two flips make 4 possible routes, and only one route is heads-then-heads.",
+      },
+      {
+        q: "Picking a colour, P(red) = 0.5 and P(blue) = 0.2. What is P(green)?",
+        options: ["0.3", "0.7", "0.2", "0.5"],
+        correct: 0,
+        concept: "All the probabilities of every possible outcome must add up to 1.",
+        deeper:
+          "0.5 + 0.2 + P(green) = 1, so P(green) = 1 − 0.7 = 0.3. When something must land on exactly one of a fixed set of options, those probabilities total 1.",
+        analogy:
+          "The whole bag is 100% of the picks. Red and blue take 70% between them, so green must make up the remaining 30%.",
       },
     ],
   },
@@ -159,17 +441,71 @@ export const TOPICS: Topic[] = [
         q: "Find the mean of 4, 8, 6, 2.",
         options: ["5", "6", "20", "4"],
         correct: 0,
-        concept: "Mean = add all the values, divide by how many there are.",
-        deeper: "Sum = 20, count = 4, so 20 ÷ 4 = 5.",
-        analogy: "Pool £20 of pocket money among 4 friends — £5 each.",
+        concept: "The mean ('average') = add up all the values, then divide by how many there are.",
+        deeper:
+          "Sum = 4 + 8 + 6 + 2 = 20. There are 4 numbers, so mean = 20 ÷ 4 = 5. The mean shares the total out equally between all the items.",
+        analogy:
+          "Like pooling everyone's pocket money into one pot (£20) and splitting it evenly among the 4 friends — £5 each.",
       },
       {
         q: "Find the median of 7, 3, 9, 1, 5.",
         options: ["5", "9", "7", "4"],
         correct: 0,
-        concept: "The middle value — but order the numbers first.",
-        deeper: "Ordered: 1, 3, 5, 7, 9. The middle of 5 numbers is the 3rd: 5.",
-        analogy: "Line everyone up by height; the median stands dead centre.",
+        concept: "The median is the middle value — but you MUST put the numbers in order first.",
+        deeper:
+          "In order: 1, 3, 5, 7, 9. With 5 numbers, the middle one is the 3rd: 5. If there were an even count, you'd average the two middle numbers.",
+        analogy:
+          "Line everyone up by height; the median is whoever's standing dead centre. You can't find the middle of a messy crowd — line them up first.",
+      },
+      {
+        q: "Find the mode of 2, 4, 4, 7, 9, 4, 2.",
+        options: ["4", "2", "7", "3"],
+        correct: 0,
+        concept: "The mode is the value that appears most often.",
+        deeper:
+          "Counting up: 2 appears twice, 4 appears three times, 7 once, 9 once. 4 is the most frequent, so the mode is 4. 'Mode' and 'most' both start with 'mo' — a handy memory hook.",
+        analogy:
+          "It's the 'most popular' value — like the best-selling flavour at an ice-cream van: whichever gets picked the most.",
+      },
+      {
+        q: "Find the range of 12, 5, 20, 8.",
+        options: ["15", "20", "8", "12"],
+        correct: 0,
+        concept: "The range measures spread: largest value minus smallest value.",
+        deeper:
+          "Biggest = 20, smallest = 5, so range = 20 − 5 = 15. The range isn't an average — it tells you how spread out the data is, not where its centre is.",
+        analogy:
+          "Like the gap between the tallest and shortest person in a room — it tells you how varied the heights are, not the typical height.",
+      },
+      {
+        q: "The mean of 5 numbers is 8. What is their total?",
+        options: ["40", "13", "8", "1.6"],
+        correct: 0,
+        concept: "Total = mean × how many numbers there are (rearranging the mean formula).",
+        deeper:
+          "Mean = total ÷ count, so total = mean × count = 8 × 5 = 40. This 'reverse mean' trick is common in exams when they give you the average and ask for the sum.",
+        analogy:
+          "If 5 friends each effectively have £8 on average, the shared pot must hold 5 × £8 = £40 in total.",
+      },
+      {
+        q: "Find the median of 4, 1, 8, 6.",
+        options: ["5", "4", "6", "4.5"],
+        correct: 0,
+        concept: "With an even amount of numbers, the median is the mean of the two middle values.",
+        deeper:
+          "Ordered: 1, 4, 6, 8. The two middle numbers are 4 and 6; their average is (4 + 6) ÷ 2 = 5. Always order first, then find the centre.",
+        analogy:
+          "With no single person standing in the exact middle of the line, you take the midpoint between the two centre people.",
+      },
+      {
+        q: "Five people earn a mean of £20. A sixth person earns £50. What's the new mean?",
+        options: ["£25", "£35", "£30", "£24"],
+        correct: 0,
+        concept: "To find a new mean after adding a value, rebuild the total and divide by the new count.",
+        deeper:
+          "Original total = 5 × £20 = £100. Add £50 → £150. Now there are 6 people: £150 ÷ 6 = £25. You can't just average £20 and £50, because the group sizes differ.",
+        analogy:
+          "Pour the new person's £50 into the existing £100 pot (£150) and re-share it across all 6 people: £25 each.",
       },
     ],
   },
@@ -183,17 +519,78 @@ export const TOPICS: Topic[] = [
         q: "A right-angled triangle has shorter sides 3 cm and 4 cm. How long is the hypotenuse?",
         options: ["5 cm", "7 cm", "12 cm", "25 cm"],
         correct: 0,
-        concept: "a² + b² = c², where c is the hypotenuse (longest side).",
-        deeper: "3² + 4² = 9 + 16 = 25, and √25 = 5 cm. (3-4-5 is the classic trio.)",
-        analogy: "Two small squares (9 and 16) exactly fill the big square (25); its side is √25 = 5.",
+        concept:
+          "Pythagoras' theorem: in a right-angled triangle, a² + b² = c², where c is the longest side (the hypotenuse).",
+        deeper:
+          "3² + 4² = 9 + 16 = 25, and the hypotenuse = √25 = 5 cm. The hypotenuse is always opposite the right angle and is the longest side. 3-4-5 is the most famous right-triangle trio.",
+        analogy:
+          "Picture squares built on each side. Pythagoras says the two small squares' areas (9 and 16) exactly fill the big square (25) on the longest side. Square-root it to get the side length.",
+      },
+      {
+        q: "In a right-angled triangle, which side is the hypotenuse?",
+        options: [
+          "The side opposite the right angle",
+          "The shortest side",
+          "A side touching the right angle",
+          "Any side you choose",
+        ],
+        correct: 0,
+        concept:
+          "The hypotenuse is the longest side of a right-angled triangle and sits directly opposite the right angle.",
+        deeper:
+          "The right angle (the little square) 'points across' at the hypotenuse. Because the biggest angle faces the biggest side, the hypotenuse is always the longest. The other two sides are the 'legs'.",
+        analogy:
+          "Stand in the corner with the right angle and look straight across the triangle — the side you're facing is the hypotenuse.",
+      },
+      {
+        q: "A right-angled triangle has hypotenuse 13 and one shorter side 5. Find the other side.",
+        options: ["12", "8", "18", "14"],
+        correct: 0,
+        concept: "To find a shorter side, rearrange Pythagoras: subtract the known square from the hypotenuse squared.",
+        deeper:
+          "Here c = 13 and one side a = 5. b² = c² − a² = 169 − 25 = 144, so b = √144 = 12. When finding a shorter side you SUBTRACT; when finding the hypotenuse you ADD. (5-12-13 is another classic trio.)",
+        analogy:
+          "The big square (169) is already built. One small square (25) takes up part of it; whatever's left (144) must be the other small square. Square-root it for the side.",
+      },
+      {
+        q: "Do sides of 6, 8 and 10 make a right-angled triangle?",
+        options: ["Yes", "No", "Only if drawn carefully", "Impossible to tell"],
+        correct: 0,
+        concept:
+          "If a² + b² = c² works for the three sides, the triangle has a right angle (the converse of Pythagoras).",
+        deeper:
+          "Test the two shorter sides against the longest: 6² + 8² = 36 + 64 = 100, and 10² = 100. They match, so yes — it's right-angled. (6-8-10 is just the 3-4-5 triangle doubled.)",
+        analogy:
+          "It's a checker: if the two small squares add up exactly to the big square, the corner is a perfect right angle — like testing whether a picture frame is truly square.",
+      },
+      {
+        q: "A right-angled triangle has shorter sides 5 cm and 12 cm. Find the hypotenuse.",
+        options: ["13 cm", "17 cm", "7 cm", "60 cm"],
+        correct: 0,
+        concept: "Add the squares of the two shorter sides, then square-root to get the hypotenuse.",
+        deeper:
+          "5² + 12² = 25 + 144 = 169, and √169 = 13 cm. 5-12-13 is a well-known right-angled trio worth remembering alongside 3-4-5.",
+        analogy:
+          "Two small squares of area 25 and 144 combine to exactly tile the big square (169) on the longest side; its side is √169 = 13.",
       },
       {
         q: "What is √81?",
         options: ["9", "8", "40.5", "18"],
         correct: 0,
-        concept: "A square root asks: what number times itself gives this?",
-        deeper: "9 × 9 = 81, so √81 = 9.",
-        analogy: "A square tile of area 81 cm² has sides of 9 cm (9 × 9 fills it).",
+        concept: "A square root asks: what number times itself gives this? It undoes squaring.",
+        deeper:
+          "√81 = 9 because 9 × 9 = 81. Square roots matter in Pythagoras because the formula gives you the square of a side, and you must root it to get the actual length.",
+        analogy: "If a square tile has an area of 81 cm², each side must be 9 cm, since 9 × 9 fills the tile.",
+      },
+      {
+        q: "A 10 m ladder leans on a wall with its base 6 m from the wall. How high up does it reach?",
+        options: ["8 m", "4 m", "16 m", "6 m"],
+        correct: 0,
+        concept: "The ladder is the hypotenuse; to find a shorter side, subtract the squares.",
+        deeper:
+          "Ladder (hypotenuse) = 10, base = 6. Height² = 10² − 6² = 100 − 36 = 64, so height = √64 = 8 m. Real-life right-angle problems use Pythagoras in exactly this way.",
+        analogy:
+          "The wall, ground and ladder form a right-angled triangle. The big square (100) minus the ground's square (36) leaves the wall's square (64), so it reaches 8 m up.",
       },
     ],
   },
@@ -207,17 +604,49 @@ export const TOPICS: Topic[] = [
         q: "What's the next term: 3, 7, 11, 15, ...?",
         options: ["19", "18", "20", "17"],
         correct: 0,
-        concept: "Add the same amount each time — the common difference.",
-        deeper: "Each step is +4, so 15 + 4 = 19.",
-        analogy: "Stairs of equal height — keep adding one step (4).",
+        concept: "In a linear (arithmetic) sequence you add the same amount each time — find that common difference.",
+        deeper:
+          "Each term goes up by 4 (3→7→11→15), so the next is 15 + 4 = 19. That constant step is called the common difference.",
+        analogy:
+          "Like climbing stairs where every step is the same height — once you know the step size (4), you just keep adding it.",
+      },
+      {
+        q: "Find the common difference of 20, 17, 14, 11, ...",
+        options: ["-3", "3", "-17", "-6"],
+        correct: 0,
+        concept: "The common difference is each term minus the one before it — and it can be negative.",
+        deeper:
+          "17 − 20 = −3, and it stays −3 each step (14 − 17 = −3). A negative common difference just means the sequence is decreasing.",
+        analogy: "Walking down a staircase: each step drops you the same amount — here, −3 every time.",
       },
       {
         q: "The nth term of a sequence is 2n + 1. What is the 4th term?",
         options: ["9", "8", "7", "24"],
         correct: 0,
-        concept: "Substitute the position number n into the rule.",
-        deeper: "n = 4: 2(4) + 1 = 9. The rule jumps to any term — the 100th is 201.",
-        analogy: "Vending machine: type slot 4, it dispenses term 9.",
+        concept: "The nth-term rule is a formula — substitute the position number n to get that term.",
+        deeper:
+          "For the 4th term, n = 4: 2(4) + 1 = 8 + 1 = 9. The rule lets you jump straight to any term without listing them all — e.g. the 100th term is 2(100) + 1 = 201.",
+        analogy:
+          "It's like a vending machine: type in the slot number (n = 4) and it dispenses that exact term (9).",
+      },
+      {
+        q: "What kind of sequence is 2, 4, 8, 16, ...?",
+        options: ["Each term doubles (geometric)", "You add 2 each time", "Square numbers", "Random"],
+        correct: 0,
+        concept: "If you multiply by the same number each time (rather than adding), it's a geometric sequence.",
+        deeper:
+          "2 → 4 → 8 → 16 multiplies by 2 each step, so it's geometric with ratio 2. Compare with arithmetic, where you ADD a fixed amount. The growing gaps (2, 4, 8) are a giveaway that you're multiplying.",
+        analogy:
+          "Like a rumour where each person tells two more — the numbers explode by multiplying, not by adding a steady amount.",
+      },
+      {
+        q: "Next term in the square numbers 1, 4, 9, 16, ...?",
+        options: ["25", "20", "24", "32"],
+        correct: 0,
+        concept: "Square numbers come from multiplying a whole number by itself: 1², 2², 3², ...",
+        deeper:
+          "1, 4, 9, 16 are 1², 2², 3², 4². The next is 5² = 25. A neat fact: the gaps between them (3, 5, 7, ...) are the odd numbers.",
+        analogy: "Each is the number of dots in a perfect square grid: a 5×5 grid holds 25 dots.",
       },
     ],
   },
@@ -231,17 +660,49 @@ export const TOPICS: Topic[] = [
         q: "What is 2³?",
         options: ["8", "6", "9", "23"],
         correct: 0,
-        concept: "A power says how many times to multiply the base by itself.",
-        deeper: "2³ = 2 × 2 × 2 = 8 (NOT 2 × 3).",
-        analogy: "Double from 1 three times: 2, 4, 8.",
+        concept: "A power (index) tells you how many times to multiply the base by itself.",
+        deeper:
+          "2³ means 2 × 2 × 2 = 8. The small raised number (3) is the index; it is NOT 2 × 3, so 2³ = 8, not 6.",
+        analogy: "Think of repeated doubling: start at 1 and double three times (×2, ×2, ×2) → 2, 4, 8.",
+      },
+      {
+        q: "What is 5²?",
+        options: ["25", "10", "7", "52"],
+        correct: 0,
+        concept: "'Squared' means a number multiplied by itself once — raised to the power 2.",
+        deeper:
+          "5² = 5 × 5 = 25. Squaring links to area: a square of side 5 has area 25. Don't confuse 5² with 5 × 2 = 10.",
+        analogy: "A 5-by-5 patio of slabs needs 25 slabs — that's 5 squared.",
       },
       {
         q: "Write 2⁴ × 2³ as a single power of 2.",
         options: ["2⁷", "2¹²", "4⁷", "2¹"],
         correct: 0,
-        concept: "Multiplying powers of the same base — ADD the indices.",
-        deeper: "2⁴ × 2³ = 2^(4+3) = 2⁷, i.e. seven 2s multiplied together.",
-        analogy: "4 twos in one bag, 3 in another — tip together for 7 twos.",
+        concept: "When multiplying powers of the same base, ADD the indices.",
+        deeper:
+          "2⁴ × 2³ = 2^(4+3) = 2⁷. That's because (2×2×2×2) × (2×2×2) is seven 2s multiplied together. The base stays the same; only the indices add.",
+        analogy:
+          "You've got 4 twos in one bag and 3 twos in another. Tip them together and you have 7 twos being multiplied — 2⁷.",
+      },
+      {
+        q: "What is 7⁰?",
+        options: ["1", "0", "7", "70"],
+        correct: 0,
+        concept: "Any non-zero number to the power 0 equals 1.",
+        deeper:
+          "It follows from the division rule: 7² ÷ 7² = 7^(2−2) = 7⁰, but anything ÷ itself = 1, so 7⁰ = 1. This holds for any non-zero base.",
+        analogy:
+          "It's the 'starting point' before you've multiplied by anything — like the 1 you begin with before doubling or tripling.",
+      },
+      {
+        q: "What is √(6²)?",
+        options: ["6", "36", "12", "3"],
+        correct: 0,
+        concept: "Square rooting undoes squaring — they're opposite operations.",
+        deeper:
+          "6² = 36, and √36 = 6, so √(6²) = 6. Because the two operations cancel out, the square root of a number squared just returns the original (positive) number.",
+        analogy:
+          "Squaring then square-rooting is like locking then unlocking the same door — you end up exactly where you started.",
       },
     ],
   },
@@ -255,17 +716,47 @@ export const TOPICS: Topic[] = [
         q: "A rectangle is 6 cm by 4 cm. What is its area?",
         options: ["24 cm²", "20 cm²", "10 cm²", "24 cm"],
         correct: 0,
-        concept: "Area of a rectangle = length × width, in square units.",
-        deeper: "6 × 4 = 24 cm². (Perimeter would be 6+4+6+4 = 20 cm.)",
-        analogy: "Tile it with 1 cm squares: 6 across, 4 down = 24 tiles.",
+        concept: "Area of a rectangle = length × width, measured in square units (cm²).",
+        deeper:
+          "6 × 4 = 24 cm². Area counts how many 1 cm squares fit inside, so the units are squared (cm²). The perimeter would instead be the distance around: 6+4+6+4 = 20 cm.",
+        analogy: "Imagine tiling the rectangle with 1 cm squares: 6 across and 4 down makes 24 tiles.",
+      },
+      {
+        q: "A rectangle is 6 cm by 4 cm. What is its perimeter?",
+        options: ["20 cm", "24 cm", "10 cm", "48 cm"],
+        correct: 0,
+        concept: "Perimeter is the total distance around the edge — add up all the sides.",
+        deeper:
+          "6 + 4 + 6 + 4 = 20 cm, or 2 × (6 + 4) = 20 cm. Perimeter is a length (cm), unlike area which is squared (cm²).",
+        analogy: "It's the length of fence you'd need to go all the way around the garden.",
       },
       {
         q: "A triangle has base 10 cm and height 6 cm. Find its area.",
         options: ["30 cm²", "60 cm²", "16 cm²", "30 cm"],
         correct: 0,
         concept: "Area of a triangle = ½ × base × height.",
-        deeper: "½ × 10 × 6 = 30 cm². A triangle is half its bounding rectangle (10 × 6 = 60).",
-        analogy: "Two identical triangles make a rectangle, so one is half its area.",
+        deeper:
+          "½ × 10 × 6 = 30 cm². A triangle is exactly half of the rectangle that would box it in (10 × 6 = 60), which is where the ½ comes from. The height must be the perpendicular (straight-up) height.",
+        analogy: "Two identical triangles slot together to make a rectangle, so one triangle is half that rectangle's area.",
+      },
+      {
+        q: "A square has an area of 49 cm². How long is each side?",
+        options: ["7 cm", "12.25 cm", "24.5 cm", "9 cm"],
+        correct: 0,
+        concept: "For a square, area = side², so the side = the square root of the area.",
+        deeper:
+          "Side² = 49, so side = √49 = 7 cm. A square's four sides are equal, so once you root the area you have every side.",
+        analogy:
+          "If 49 floor tiles form a perfect square, they must be arranged 7 by 7 — so each edge is 7 tiles long.",
+      },
+      {
+        q: "A rectangle has area 24 cm² and length 8 cm. What is its width?",
+        options: ["3 cm", "16 cm", "32 cm", "12 cm"],
+        correct: 0,
+        concept: "Rearrange area = length × width to get width = area ÷ length.",
+        deeper:
+          "Width = 24 ÷ 8 = 3 cm. Check: 8 × 3 = 24 cm² ✓. When you know the area and one side, divide to find the other.",
+        analogy: "You have 24 tiles in a block 8 long; they must stack 3 rows deep to use them all.",
       },
     ],
   },
@@ -279,17 +770,45 @@ export const TOPICS: Topic[] = [
         q: "Angles on a straight line add up to how many degrees?",
         options: ["180°", "90°", "360°", "270°"],
         correct: 0,
-        concept: "Angles on a straight line sum to 180°.",
-        deeper: "A straight line is half a full turn (360°), so 180°.",
-        analogy: "Spin from facing forward to facing backward — that half-turn is 180°.",
+        concept: "Angles that sit together on a straight line always sum to 180°.",
+        deeper:
+          "A straight line is half a full turn. A full turn is 360°, so a straight line is 180°. If one angle on a line is 130°, the other must be 180 − 130 = 50°.",
+        analogy: "Spin from facing forward to facing directly backward — that half-turn is 180°.",
+      },
+      {
+        q: "Two angles sit on a straight line. One is 110°. What's the other?",
+        options: ["70°", "90°", "250°", "80°"],
+        correct: 0,
+        concept: "Angles on a straight line sum to 180°, so subtract the known one from 180.",
+        deeper:
+          "180 − 110 = 70°. These are called supplementary angles. Spotting 'on a straight line' tells you the pair must total 180°.",
+        analogy: "Two slices fill a half-pie (180°). If one slice is 110°, the rest of the half must be 70°.",
+      },
+      {
+        q: "Angles around a point add up to how many degrees?",
+        options: ["360°", "180°", "90°", "270°"],
+        correct: 0,
+        concept: "Angles meeting at a single point make a full turn — 360°.",
+        deeper:
+          "A complete rotation is 360°, so if several angles share a point with no gaps, they total 360°. Three equal angles around a point would each be 120°.",
+        analogy: "Spin all the way around until you face forward again — that full circle is 360°.",
+      },
+      {
+        q: "What do the three angles inside any triangle add up to?",
+        options: ["180°", "360°", "90°", "270°"],
+        correct: 0,
+        concept: "The interior angles of any triangle always sum to 180°.",
+        deeper:
+          "No matter the triangle's shape, its three angles total 180°. So if two angles are 60° and 70°, the third is 180 − 130 = 50°.",
+        analogy: "Tear off a triangle's three corners and lay them side by side — they always line up into a straight line (180°).",
       },
       {
         q: "Two angles in a triangle are 50° and 60°. What is the third angle?",
         options: ["70°", "80°", "60°", "110°"],
         correct: 0,
-        concept: "A triangle's angles total 180°, so subtract the known two.",
-        deeper: "50 + 60 = 110, and 180 − 110 = 70°.",
-        analogy: "The three angles share a 180° budget; two spend 110°, leaving 70°.",
+        concept: "Since a triangle's angles total 180°, subtract the two known angles from 180.",
+        deeper: "50 + 60 = 110, and 180 − 110 = 70°. Always add the known angles first, then take them off 180.",
+        analogy: "The three angles share a 180° budget. Two of them spend 110°, leaving 70° for the last one.",
       },
     ],
   },
