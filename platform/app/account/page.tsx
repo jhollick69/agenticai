@@ -1,0 +1,72 @@
+import Link from "next/link";
+import { getEntitlement } from "@/lib/entitlement";
+import AuthForm from "@/components/AuthForm";
+import UpgradeButtons from "@/components/UpgradeButtons";
+import AccountActions from "@/components/AccountActions";
+
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: { upgrade?: string; status?: string };
+}) {
+  const ent = await getEntitlement();
+
+  if (!ent.signedIn) {
+    return (
+      <main className="card">
+        <h1>Sign in</h1>
+        <p className="sub">
+          Sign in (or create an account) to save progress and manage your subscription.
+        </p>
+        <AuthForm />
+      </main>
+    );
+  }
+
+  return (
+    <main className="card">
+      <h1>Your account</h1>
+      <p className="sub">
+        Signed in as <strong>{ent.email}</strong> ·{" "}
+        {ent.isPremium ? "✦ Premium" : "Free plan"}
+      </p>
+
+      {searchParams.status === "success" && (
+        <p className="msg good">🎉 Payment received — your Premium access is active!</p>
+      )}
+      {searchParams.status === "cancel" && (
+        <p className="msg">Checkout cancelled — no charge was made.</p>
+      )}
+
+      {ent.isPremium ? (
+        <>
+          <p>You have full access to every topic. Nice one.</p>
+          <div className="actions">
+            <Link href="/" className="btn primary">
+              Start revising →
+            </Link>
+            <AccountActions mode="portal" />
+            <AccountActions mode="signout" />
+          </div>
+        </>
+      ) : (
+        <>
+          {searchParams.upgrade === "1" && (
+            <p className="msg">That topic is Premium — unlock everything below.</p>
+          )}
+          <h2 style={{ fontSize: 18, marginTop: 18 }}>Go Premium ✦</h2>
+          <ul className="perks">
+            <li>All topics &amp; every question</li>
+            <li>Concept explainers, deeper dives and analogies</li>
+            <li>Unlimited 50/50 lifelines</li>
+            <li>Cancel anytime</li>
+          </ul>
+          <UpgradeButtons />
+          <div className="actions">
+            <AccountActions mode="signout" />
+          </div>
+        </>
+      )}
+    </main>
+  );
+}

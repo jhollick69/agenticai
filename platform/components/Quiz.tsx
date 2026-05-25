@@ -1,0 +1,226 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import type { Topic } from "@/lib/content";
+
+type Shuffled = { text: string; isCorrect: boolean };
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let n = a.length - 1; n > 0; n--) {
+    const r = Math.floor(Math.random() * (n + 1));
+    [a[n], a[r]] = [a[r], a[n]];
+  }
+  return a;
+}
+
+export default function Quiz({ topic }: { topic: Topic }) {
+  const [qi, setQi] = useState(0);
+  const [answered, setAnswered] = useState(false);
+  const [picked, setPicked] = useState<number | null>(null);
+  const [usedFifty, setUsedFifty] = useState(false);
+  const [dimmed, setDimmed] = useState<number[]>([]);
+  const [showAnalogy, setShowAnalogy] = useState(false);
+  const [showDeeper, setShowDeeper] = useState(false);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [done, setDone] = useState(false);
+
+  const q = topic.questions[qi];
+
+  // Reshuffle options whenever the question changes.
+  const options: Shuffled[] = useMemo(
+    () => shuffle(q.options.map((text, i) => ({ text, isCorrect: i === q.correct }))),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [qi, topic.id],
+  );
+  const correctIndex = options.findIndex((o) => o.isCorrect);
+
+  function choose(i: number) {
+    if (answered) return;
+    setPicked(i);
+    setAnswered(true);
+    if (options[i].isCorrect) {
+      setScore((s) => s + 1);
+      setStreak((s) => s + 1);
+    } else {
+      setStreak(0);
+    }
+  }
+
+  function useFifty() {
+    if (answered || usedFifty) return;
+    setUsedFifty(true);
+    const wrong = shuffle(options.map((_, i) => i).filter((i) => i !== correctIndex));
+    setDimmed(wrong.slice(1));
+  }
+
+  function next() {
+    if (qi + 1 < topic.questions.length) {
+      setQi(qi + 1);
+      setAnswered(false);
+      setPicked(null);
+      setUsedFifty(false);
+      setDimmed([]);
+      setShowAnalogy(false);
+      setShowDeeper(false);
+    } else {
+      setDone(true);
+    }
+  }
+
+  function restart() {
+    setQi(0);
+    setAnswered(false);
+    setPicked(null);
+    setUsedFifty(false);
+    setDimmed([]);
+    setShowAnalogy(false);
+    setShowDeeper(false);
+    setScore(0);
+    setStreak(0);
+    setDone(false);
+  }
+
+  if (done) {
+    const total = topic.questions.length;
+    const pct = score / total;
+    const msg =
+      pct === 1
+        ? "Perfect! You've nailed this topic. 🌟"
+        : pct >= 0.75
+          ? "Great work — nearly there. Run it again to lock it in."
+          : pct >= 0.5
+            ? "Good effort! Review the concepts and try again."
+            : "Tricky one — read the analogies and have another go. You've got this.";
+    return (
+      <div style={{ textAlign: "center" }}>
+        <h1>Topic complete! 🎉</h1>
+        <div style={{ fontSize: 46, fontWeight: 900, color: "var(--good)", margin: "8px 0" }}>
+          {score} / {total}
+        </div>
+        <p className="sub">{msg}</p>
+        <div className="actions" style={{ justifyContent: "center" }}>
+          <button className="btn" onClick={restart}>
+            ↻ Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <p className="sub">
+        {topic.icon} {topic.name} · Q{qi + 1} of {topic.questions.length} · ⭐ {score} · 🔥 {streak}
+      </p>
+      <div style={{ fontSize: 19, fontWeight: 700, margin: "4px 0 18px" }}>{q.q}</div>
+
+      <div style={{ display: "grid", gap: 10 }}>
+        {options.map((o, i) => {
+          const isCorrect = answered && i === correctIndex;
+          const isWrong = answered && i === picked && i !== correctIndex;
+          const border = isCorrect
+            ? "var(--good)"
+            : isWrong
+              ? "var(--bad)"
+              : "var(--line)";
+          return (
+            <button
+              key={i}
+              onClick={() => choose(i)}
+              disabled={answered || dimmed.includes(i)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                background: "var(--panel2)",
+                border: `2px solid ${border}`,
+                color: "var(--ink)",
+                borderRadius: 12,
+                padding: "14px 16px",
+                fontSize: 16,
+                textAlign: "left",
+                cursor: answered ? "default" : "pointer",
+                opacity: dimmed.includes(i) ? 0.28 : 1,
+              }}
+            >
+              <span
+                style={{
+                  flex: "0 0 28px",
+                  height: 28,
+                  borderRadius: 8,
+                  background: "#0e1430",
+                  border: "1px solid var(--line)",
+                  display: "grid",
+                  placeItems: "center",
+                  fontWeight: 800,
+                  fontSize: 14,
+                  color: "var(--accent)",
+                }}
+              >
+                {"ABCD"[i]}
+              </span>
+              {o.text}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="actions">
+        <button className="btn" onClick={useFifty} disabled={answered || usedFifty}>
+          ⚖️ 50/50
+        </button>
+        <button className="btn" onClick={() => setShowAnalogy((s) => !s)}>
+          🤔 Confused?
+        </button>
+      </div>
+
+      {showAnalogy && (
+        <div
+          className="card"
+          style={{ marginTop: 14, background: "rgba(255,209,102,.10)", borderColor: "rgba(255,209,102,.4)" }}
+        >
+          <strong style={{ color: "var(--warn)" }}>🤔 Simple analogy</strong>
+          <p style={{ margin: "6px 0 0" }}>{q.analogy}</p>
+        </div>
+      )}
+
+      {answered && (
+        <>
+          <p className={"msg " + (picked === correctIndex ? "good" : "bad")}>
+            {picked === correctIndex
+              ? `✅ Correct!  🔥 streak ×${streak}`
+              : `❌ Not quite — the answer was ${q.options[q.correct]}.`}
+          </p>
+          <div
+            className="card"
+            style={{ marginTop: 8, background: "rgba(110,231,255,.08)", borderColor: "rgba(110,231,255,.35)" }}
+          >
+            <strong style={{ color: "var(--accent)" }}>💡 The concept</strong>
+            <p style={{ margin: "6px 0 0" }}>{q.concept}</p>
+          </div>
+          {showDeeper && (
+            <div
+              className="card"
+              style={{ marginTop: 8, background: "rgba(255,122,224,.08)", borderColor: "rgba(255,122,224,.35)" }}
+            >
+              <strong style={{ color: "var(--accent2)" }}>🔍 Deeper dive</strong>
+              <p style={{ margin: "6px 0 0" }}>{q.deeper}</p>
+            </div>
+          )}
+          <div className="actions">
+            {!showDeeper && (
+              <button className="btn" onClick={() => setShowDeeper(true)}>
+                🔍 Deeper dive
+              </button>
+            )}
+            <button className="btn primary" onClick={next}>
+              {qi + 1 < topic.questions.length ? "Next →" : "Finish →"}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
