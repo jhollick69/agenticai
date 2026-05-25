@@ -31,7 +31,7 @@ const FAQS = [
   },
   {
     q: "What year group is it for?",
-    a: "GCSE maths (roughly ages 14–16), but it's great for anyone shoring up the foundations — Years 7–9 included.",
+    a: "GCSE (ages 14–16) and A-Level (16–18) maths — and it's great for anyone shoring up the foundations a bit earlier, too.",
   },
   {
     q: "Can I cancel?",
@@ -53,9 +53,9 @@ export default async function Landing() {
   return (
     <main>
       <section className="hero">
-        <span className="kicker">GCSE Maths · ages 14–16</span>
+        <span className="kicker">GCSE &amp; A-Level · ages 14–18</span>
         <h1 className="heroTitle">
-          GCSE maths that finally <span className="grad">makes sense</span>.
+          GCSE &amp; A-Level maths that finally <span className="grad">makes sense</span>.
         </h1>
         <p className="heroSub">
           Bite-size quizzes that explain the <em>why</em> behind every answer — with a plain-English
@@ -73,7 +73,7 @@ export default async function Landing() {
           )}
         </div>
         <p className="note" style={{ textAlign: "center" }}>
-          3 topics free forever · Premium starts with a 7-day free trial
+          Free topics to try · Premium starts with a 7-day free trial
         </p>
       </section>
 
@@ -101,7 +101,7 @@ export default async function Landing() {
             <strong>Build a streak.</strong> Points and lifelines keep them coming back.
           </li>
           <li>
-            <strong>Go Premium</strong> to unlock all 11 topics — free for 7 days.
+            <strong>Go Premium</strong> to unlock every GCSE &amp; A-Level topic — free for 7 days.
           </li>
         </ol>
       </section>

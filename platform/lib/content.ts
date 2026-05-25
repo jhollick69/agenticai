@@ -15,11 +15,14 @@ export type Question = {
   analogy: string;
 };
 
+export type Level = "gcse" | "alevel";
+
 export type Topic = {
   id: string;
   icon: string;
   name: string;
   free: boolean;
+  level?: Level; // defaults to "gcse" when omitted
   questions: Question[];
 };
 
@@ -812,7 +815,361 @@ export const TOPICS: Topic[] = [
       },
     ],
   },
+  {
+    id: "differentiation",
+    icon: "📈",
+    name: "Differentiation",
+    free: true,
+    level: "alevel",
+    questions: [
+      {
+        q: "Differentiate y = x³. What is dy/dx?",
+        options: ["3x²", "x²", "3x", "x⁴/4"],
+        correct: 0,
+        concept: "To differentiate a power of x, multiply by the power, then reduce the power by 1.",
+        deeper:
+          "For y = xⁿ, dy/dx = n·xⁿ⁻¹. With x³, bring the 3 down and subtract 1 from the power: 3x³⁻¹ = 3x². The derivative gives the gradient of the curve at any point.",
+        analogy:
+          "Differentiation is a speedometer for a curve — it rewrites the formula into its 'steepness at each instant' version.",
+      },
+      {
+        q: "Differentiate y = 5x² + 2x.",
+        options: ["10x + 2", "5x + 2", "10x", "7x"],
+        correct: 0,
+        concept: "Differentiate each term separately, then add the results.",
+        deeper:
+          "d/dx(5x²) = 5·2x = 10x; d/dx(2x) = 2. So dy/dx = 10x + 2. Each term follows the 'multiply by the power, drop the power by one' rule independently.",
+        analogy: "Treat a sum like separate lanes — find each lane's slope, then combine them.",
+      },
+      {
+        q: "Find the gradient of y = x² at the point where x = 3.",
+        options: ["6", "9", "3", "2"],
+        correct: 0,
+        concept: "Differentiate to get the gradient function, then substitute the x-value.",
+        deeper:
+          "dy/dx = 2x is a formula for the gradient at ANY point. At x = 3 the gradient is 2·3 = 6. (The y-value 9 is the height, not the slope.)",
+        analogy: "The derivative 2x is a price list; ask 'slope at x = 3?' and it hands back 6.",
+      },
+      {
+        q: "What is the derivative of the constant y = 7?",
+        options: ["0", "7", "1", "7x"],
+        correct: 0,
+        concept: "A constant never changes, so its rate of change is zero.",
+        deeper:
+          "y = 7 is a flat horizontal line; its gradient everywhere is 0, so dy/dx = 0. This is why constant terms simply vanish when you differentiate.",
+        analogy: "Standing still means zero speed — a constant has no slope.",
+      },
+      {
+        q: "At a stationary point of a curve, what is the value of dy/dx?",
+        options: ["0", "1", "Undefined", "The maximum value of y"],
+        correct: 0,
+        concept: "Stationary points (maxima, minima, inflections) occur where the gradient is zero.",
+        deeper:
+          "Set dy/dx = 0 and solve to find them — the curve is momentarily flat there. To tell which type, check the second derivative or how the gradient changes sign either side.",
+        analogy: "At the very top of a hill or bottom of a valley, the ground is level — slope zero.",
+      },
+    ],
+  },
+  {
+    id: "integration",
+    icon: "♾️",
+    name: "Integration",
+    free: false,
+    level: "alevel",
+    questions: [
+      {
+        q: "Integrate ∫ 2x dx.",
+        options: ["x² + c", "2x² + c", "x²", "2 + c"],
+        correct: 0,
+        concept: "Integration reverses differentiation: raise the power by 1 and divide by the new power.",
+        deeper:
+          "For xⁿ, ∫ xⁿ dx = xⁿ⁺¹/(n+1) + c. For 2x: raise to x² and divide by 2 → 2·x²/2 = x². Add the constant of integration c. Check: differentiating x² + c gives 2x ✓.",
+        analogy: "Integration is differentiation in rewind — undo 'drop the power' by raising it back up.",
+      },
+      {
+        q: "Why do we add '+ c' to an indefinite integral?",
+        options: [
+          "Any constant differentiates to 0, so it's lost when differentiating",
+          "It makes the answer bigger",
+          "It is the gradient",
+          "To round the answer",
+        ],
+        correct: 0,
+        concept: "The constant of integration accounts for information lost during differentiation.",
+        deeper:
+          "Differentiating x² + 5 and x² + 99 both give 2x — the constant disappears. So reversing 2x, we can't know the constant; we write '+ c' to represent every possibility.",
+        analogy: "Differentiation erases the constant; '+ c' is the blank we leave because we can't recover it.",
+      },
+      {
+        q: "Integrate ∫ x² dx.",
+        options: ["x³/3 + c", "2x + c", "x³ + c", "3x³ + c"],
+        correct: 0,
+        concept: "Raise the power by one and divide by the new power.",
+        deeper:
+          "∫ x² dx = x³/3 + c. Power goes 2 → 3, then divide by 3. Differentiating x³/3 gives 3x²/3 = x² ✓.",
+        analogy: "Climb the power up a step (2→3), then share by the new step number (÷3).",
+      },
+      {
+        q: "A definite integral ∫ from a to b represents which of these?",
+        options: [
+          "The area under the curve between x = a and x = b",
+          "The gradient at x = a",
+          "The y-intercept",
+          "The turning point",
+        ],
+        correct: 0,
+        concept: "A definite integral measures the (signed) area under a curve between two limits.",
+        deeper:
+          "Evaluate the integral at the top limit b and subtract its value at the bottom limit a. Areas below the x-axis count as negative.",
+        analogy: "It's adding up infinitely many thin strips under the curve to get the total area.",
+      },
+      {
+        q: "Integrate ∫ 6x² dx.",
+        options: ["2x³ + c", "6x³ + c", "12x + c", "3x³ + c"],
+        correct: 0,
+        concept: "Apply the power rule to the x part, keeping the coefficient.",
+        deeper:
+          "∫ 6x² dx = 6·x³/3 + c = 2x³ + c. Raise 2 → 3, divide the 6 by 3. Check: d/dx(2x³) = 6x² ✓.",
+        analogy: "Raise the power, then let the new power divide into the number out front.",
+      },
+    ],
+  },
+  {
+    id: "quadratics",
+    icon: "🏹",
+    name: "Quadratics",
+    free: false,
+    level: "alevel",
+    questions: [
+      {
+        q: "Solve x² − 5x + 6 = 0.",
+        options: ["x = 2 or x = 3", "x = −2 or x = −3", "x = 1 or x = 6", "x = 5 or x = 6"],
+        correct: 0,
+        concept: "Factorise into two brackets that multiply to the constant and add to the middle number.",
+        deeper:
+          "Need two numbers multiplying to +6 and adding to −5: that's −2 and −3. So (x−2)(x−3) = 0, giving x = 2 or x = 3. Each bracket set to 0 gives a root.",
+        analogy: "It's reverse-expanding — find the two brackets that multiply back to the quadratic.",
+      },
+      {
+        q: "What does the discriminant b² − 4ac tell you?",
+        options: [
+          "How many real roots the quadratic has",
+          "The coordinates of the vertex",
+          "The y-intercept",
+          "The gradient of the curve",
+        ],
+        correct: 0,
+        concept: "The discriminant reveals the number of real solutions.",
+        deeper:
+          "If b² − 4ac > 0 there are two real roots; if = 0 one repeated root; if < 0 no real roots. It's the part under the square root in the quadratic formula.",
+        analogy: "A 'how many times does the parabola cross the x-axis?' detector — before you even solve.",
+      },
+      {
+        q: "Complete the square: x² + 6x.",
+        options: ["(x + 3)² − 9", "(x + 6)² − 36", "(x + 3)² + 9", "(x + 3)²"],
+        correct: 0,
+        concept: "Halve the x-coefficient, square it, then subtract it back to keep the value unchanged.",
+        deeper:
+          "Half of 6 is 3, so x² + 6x = (x + 3)² − 3² = (x + 3)² − 9. Expand to check: (x+3)² − 9 = x² + 6x + 9 − 9 = x² + 6x ✓. This also shows the vertex is at (−3, −9).",
+        analogy: "You build the nearest perfect square (x+3)², which overshoots by 9, so subtract the extra 9.",
+      },
+      {
+        q: "Where is the vertex (turning point) of y = (x − 4)² + 2?",
+        options: ["(4, 2)", "(−4, 2)", "(4, −2)", "(2, 4)"],
+        correct: 0,
+        concept: "In the form y = (x − p)² + q, the vertex is at (p, q).",
+        deeper:
+          "The squared bracket is smallest (zero) when x = 4, giving y = 2, so the vertex is (4, 2). Note the sign flip: (x − 4) means p = +4.",
+        analogy: "A square can't go below zero, so the curve bottoms out exactly where the bracket is zero.",
+      },
+      {
+        q: "For 2x² + 3x − 5 = 0, what are a, b and c?",
+        options: [
+          "a = 2, b = 3, c = −5",
+          "a = 3, b = 2, c = −5",
+          "a = 2, b = −5, c = 3",
+          "a = 2, b = 3, c = 5",
+        ],
+        correct: 0,
+        concept: "In ax² + bx + c, the letters are the coefficients of x², x and the constant.",
+        deeper:
+          "Match term by term: 2x² → a = 2; 3x → b = 3; −5 → c = −5. Keeping the sign on c (it's −5, not 5) matters when you substitute into the quadratic formula.",
+        analogy: "Like reading quantities off a recipe label — a, b, c are just the numbers in front of each part.",
+      },
+    ],
+  },
+  {
+    id: "logarithms",
+    icon: "🚀",
+    name: "Logs & Exponentials",
+    free: false,
+    level: "alevel",
+    questions: [
+      {
+        q: "What is log₂ 8?",
+        options: ["3", "4", "2", "16"],
+        correct: 0,
+        concept: "A logarithm asks: 'what power do I raise the base to, to get this number?'",
+        deeper: "log₂ 8 asks 2 to what power makes 8. Since 2³ = 8, the answer is 3. Logs and powers are inverse operations.",
+        analogy: "Logs undo exponentials — 'how many times do I double from 1 to reach 8?' Three times.",
+      },
+      {
+        q: "Using the log laws, log a + log b = ?",
+        options: ["log(ab)", "log(a + b)", "log(a / b)", "(log a)(log b)"],
+        correct: 0,
+        concept: "Adding logs of the same base corresponds to multiplying the numbers.",
+        deeper:
+          "log a + log b = log(ab). Likewise log a − log b = log(a/b), and n·log a = log(aⁿ). These mirror the rules of indices, because logs are inverse to powers.",
+        analogy: "Logs turn multiplication into addition — exactly why slide rules made big sums easy.",
+      },
+      {
+        q: "Solve 10ˣ = 1000.",
+        options: ["x = 3", "x = 2", "x = 100", "x = 30"],
+        correct: 0,
+        concept: "Recognise the power, or take logs of both sides.",
+        deeper: "1000 = 10³, so 10ˣ = 10³ means x = 3. Equivalently x = log₁₀ 1000 = 3.",
+        analogy: "Count the zeros: 1000 has three, and each zero is one more factor of 10.",
+      },
+      {
+        q: "What is logₐ 1 for any base a?",
+        options: ["0", "1", "a", "Undefined"],
+        correct: 0,
+        concept: "The log of 1 is always 0, whatever the base.",
+        deeper: "logₐ 1 = 0 because a⁰ = 1 for every base a. You need power 0 to produce 1.",
+        analogy: "You haven't multiplied at all yet — zero doublings leaves you sitting at 1.",
+      },
+      {
+        q: "Simplify ln(e⁵), where ln is log to base e.",
+        options: ["5", "e", "5e", "1"],
+        correct: 0,
+        concept: "ln and eˣ are inverse functions, so they cancel.",
+        deeper: "ln(eˣ) = x, so ln(e⁵) = 5. Natural log is log to base e; applying ln to e^(something) returns the exponent.",
+        analogy: "ln and e are an undo-pair, like zipping then unzipping — you get the 5 back.",
+      },
+    ],
+  },
+  {
+    id: "trigonometry",
+    icon: "🌊",
+    name: "Trigonometry",
+    free: false,
+    level: "alevel",
+    questions: [
+      {
+        q: "What is the exact value of sin 30°?",
+        options: ["1/2", "√3/2", "1", "√2/2"],
+        correct: 0,
+        concept: "Some special angles have exact trig values worth memorising.",
+        deeper:
+          "sin 30° = 1/2. From the 30-60-90 triangle (sides 1, √3, 2), the side opposite 30° is 1 and the hypotenuse is 2, so sin 30° = 1/2.",
+        analogy: "These come from two 'special triangles' you keep in your back pocket instead of a calculator.",
+      },
+      {
+        q: "The identity sin²θ + cos²θ equals what?",
+        options: ["1", "0", "2", "tan θ"],
+        correct: 0,
+        concept: "The fundamental Pythagorean identity links sine and cosine.",
+        deeper:
+          "sin²θ + cos²θ = 1 for every angle θ. It's Pythagoras applied to a point (cos θ, sin θ) on the unit circle, whose radius is 1.",
+        analogy: "On a circle of radius 1, the horizontal (cos) and vertical (sin) legs always satisfy Pythagoras: their squares sum to 1.",
+      },
+      {
+        q: "tan θ is equal to which expression?",
+        options: ["sin θ / cos θ", "cos θ / sin θ", "sin θ · cos θ", "1 − cos θ"],
+        correct: 0,
+        concept: "Tangent is the ratio of sine to cosine.",
+        deeper:
+          "tan θ = sin θ / cos θ. This is why tan is undefined when cos θ = 0 (at 90° and 270°) — you'd be dividing by zero.",
+        analogy: "Tan is slope = rise ÷ run, with sin as the rise and cos as the run on the unit circle.",
+      },
+      {
+        q: "What is cos 0°?",
+        options: ["1", "0", "−1", "1/2"],
+        correct: 0,
+        concept: "At 0°, cosine takes its maximum value.",
+        deeper:
+          "cos 0° = 1. On the unit circle, angle 0 points along the positive x-axis, where the x-coordinate (cosine) is 1 and the y-coordinate (sine) is 0.",
+        analogy: "Starting flat along the x-axis you're all 'run' and no 'rise' — cos is maxed at 1.",
+      },
+      {
+        q: "How many degrees are there in π radians?",
+        options: ["180°", "90°", "360°", "270°"],
+        correct: 0,
+        concept: "Radians are another angle measure; π radians = 180°.",
+        deeper:
+          "A full circle is 2π radians = 360°, so π radians = 180°. To convert radians to degrees, multiply by 180/π (so π/2 = 90°).",
+        analogy: "Radians measure angle by arc length on a unit circle — halfway round (180°) is exactly π of those units.",
+      },
+    ],
+  },
+  {
+    id: "binomial",
+    icon: "✳️",
+    name: "Binomial Expansion",
+    free: false,
+    level: "alevel",
+    questions: [
+      {
+        q: "Expand (x + 1)².",
+        options: ["x² + 2x + 1", "x² + 1", "x² + x + 1", "2x + 1"],
+        correct: 0,
+        concept: "Square a bracket using (a + b)² = a² + 2ab + b².",
+        deeper:
+          "(x + 1)² = x² + 2·x·1 + 1² = x² + 2x + 1. The common slip is dropping the middle term 2x.",
+        analogy: "Squaring a bracket isn't squaring each bit — the cross-term 2ab is the 'overlap' you mustn't lose.",
+      },
+      {
+        q: "In Pascal's triangle, what row comes after 1, 3, 3, 1?",
+        options: ["1, 4, 6, 4, 1", "1, 4, 4, 1", "1, 3, 3, 1", "1, 5, 10, 10, 5, 1"],
+        correct: 0,
+        concept: "Each entry is the sum of the two numbers diagonally above it.",
+        deeper:
+          "From 1 3 3 1: the edges stay 1, and the inner entries are 1+3 = 4, 3+3 = 6, 3+1 = 4 → 1 4 6 4 1. These are the coefficients of (a + b)⁴.",
+        analogy: "Every number is born from the two parents sitting directly above it, added together.",
+      },
+      {
+        q: "What are the coefficients in the expansion of (a + b)³?",
+        options: ["1, 3, 3, 1", "1, 2, 1", "1, 4, 6, 4, 1", "3, 3, 3"],
+        correct: 0,
+        concept: "A row of Pascal's triangle gives the coefficients of each term.",
+        deeper:
+          "(a + b)³ = a³ + 3a²b + 3ab² + b³, so the coefficients are 1, 3, 3, 1 — read straight off Pascal's triangle.",
+        analogy: "Pascal's triangle is a coefficient lookup table — read the right row instead of multiplying out.",
+      },
+      {
+        q: "How many terms are in the expansion of (x + y)⁵?",
+        options: ["6", "5", "7", "10"],
+        correct: 0,
+        concept: "Expanding (a + b)ⁿ produces n + 1 terms.",
+        deeper:
+          "(x + y)⁵ has 5 + 1 = 6 terms, with the power of x counting down 5, 4, 3, 2, 1, 0. The number of terms is always one more than the power.",
+        analogy: "Powers of x step down from 5 to 0 — that's six rungs, counting both ends.",
+      },
+      {
+        q: "Expand (x − 2)².",
+        options: ["x² − 4x + 4", "x² + 4", "x² − 4", "x² − 2x + 4"],
+        correct: 0,
+        concept: "Use (a − b)² = a² − 2ab + b² and mind the signs.",
+        deeper:
+          "(x − 2)² = x² − 2·x·2 + 2² = x² − 4x + 4. The middle term is negative, but the last term is +4 because a negative squared is positive.",
+        analogy: "Squaring kills the minus on the last term (−2 squared is +4), but the cross-term keeps its minus.",
+      },
+    ],
+  },
 ];
+
+export const LEVELS: { id: Level; label: string; hint: string }[] = [
+  { id: "gcse", label: "GCSE", hint: "Ages 14–16" },
+  { id: "alevel", label: "A-Level", hint: "Ages 16–18" },
+];
+
+export function topicLevel(t: Topic): Level {
+  return t.level ?? "gcse";
+}
+
+export function topicsByLevel(level: Level): Topic[] {
+  return TOPICS.filter((t) => topicLevel(t) === level);
+}
 
 export function getTopic(id: string): Topic | undefined {
   return TOPICS.find((t) => t.id === id);
