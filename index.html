@@ -144,6 +144,35 @@
   .summary .score { font-size: 46px; font-weight: 900; color: var(--good); margin: 8px 0; }
   .summary .msg { color: var(--muted); margin-bottom: 18px; }
 
+  /* Account / locks / auth / paywall */
+  #accountArea { display: inline-flex; gap: 8px; align-items: center; }
+  #accountArea .email { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topic { position: relative; }
+  .topic .lock { position: absolute; top: 10px; right: 12px; font-size: 15px; }
+  .topic.locked { opacity: .82; }
+  .topic.locked:hover { border-color: var(--warn); }
+  input[type=email], input[type=text] {
+    width: 100%; background: #0e1430; border: 1px solid var(--line); color: var(--ink);
+    padding: 12px 14px; border-radius: 10px; font-size: 16px; margin-bottom: 4px;
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+  .perks { list-style: none; padding: 0; margin: 6px 0 18px; display: grid; gap: 8px; }
+  .perks li { padding-left: 26px; position: relative; }
+  .perks li::before { content: "✓"; position: absolute; left: 0; color: var(--good); font-weight: 800; }
+  .plans { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+  .plan {
+    text-align: left; background: var(--panel2); border: 2px solid var(--line); color: var(--ink);
+    border-radius: 14px; padding: 16px; cursor: pointer;
+    transition: border-color .12s, transform .12s;
+  }
+  .plan:hover { border-color: var(--accent2); transform: translateY(-2px); }
+  .plan .price { font-size: 26px; font-weight: 900; color: var(--good); }
+  .plan .per { color: var(--muted); font-size: 13px; }
+  .plan .save { display: inline-block; margin-top: 6px; font-size: 12px; color: var(--warn); font-weight: 700; }
+  .finePrint { color: var(--muted); font-size: 12px; margin-top: 16px; line-height: 1.5; }
+  .stat.premiumPill { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #0b1020; border: none; }
+  @media (max-width: 480px) { .plans { grid-template-columns: 1fr; } }
+
   .hidden { display: none; }
 
   /* Confetti */
@@ -171,6 +200,7 @@
     <div class="stat">⭐ <span class="v" id="points">0</span></div>
     <div class="stat streak">🔥 <span class="v" id="streak">0</span></div>
     <div class="stat best">🏆 <span class="v" id="best">0</span></div>
+    <span id="accountArea"></span>
   </div>
 
   <!-- HOME -->
@@ -230,6 +260,44 @@
     </div>
   </section>
 
+  <!-- AUTH -->
+  <section id="auth" class="card hidden">
+    <h1>Sign in</h1>
+    <p class="sub">Enter your email to save progress and manage your subscription. <b>Prototype:</b> there's no password yet — this is where real sign-in (e.g. Supabase) will connect.</p>
+    <label for="authEmail">Email</label>
+    <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+    <div class="feedback no" id="authFeedback"></div>
+    <div class="actions">
+      <button class="btn" id="authCancel">Cancel</button>
+      <button class="btn primary" id="authSubmit">Continue →</button>
+    </div>
+  </section>
+
+  <!-- PAYWALL -->
+  <section id="paywall" class="card hidden">
+    <h1>Unlock everything ✦</h1>
+    <p class="sub">You're on the free plan — Fractions, Percentages and Ratio are free. Go Premium to unlock all topics and every question.</p>
+    <ul class="perks">
+      <li>All 11 topics &amp; 70+ questions (more added regularly)</li>
+      <li>Every concept explanation, deeper dive and analogy</li>
+      <li>Unlimited 50/50 lifelines</li>
+      <li>Cancel anytime</li>
+    </ul>
+    <div class="plans">
+      <button class="plan" data-plan="monthly">
+        <div class="price">£4.99</div><div class="per">per month</div>
+      </button>
+      <button class="plan" data-plan="annual">
+        <div class="price">£39</div><div class="per">per year</div>
+        <span class="save">Save 35%</span>
+      </button>
+    </div>
+    <div class="actions">
+      <button class="btn" id="paywallClose">← Back to topics</button>
+    </div>
+    <p class="finePrint">⚠️ Prototype checkout — no real payment is taken, and unlocking happens only in this browser. Production will connect to Stripe Checkout with entitlement verified on a server.</p>
+  </section>
+
 </div>
 
 <script>
@@ -237,7 +305,7 @@
 // Author the CORRECT answer first (correct: 0). Options are shuffled at render time.
 const CONTENT = [
   {
-    id: "fractions", icon: "🍕", name: "Fractions",
+    id: "fractions", icon: "🍕", name: "Fractions", free: true,
     questions: [
       {
         q: "You eat 3/8 of a pizza and your mate eats 2/8. How much pizza is gone?",
@@ -291,7 +359,7 @@ const CONTENT = [
     ]
   },
   {
-    id: "percentages", icon: "💯", name: "Percentages",
+    id: "percentages", icon: "💯", name: "Percentages", free: true,
     questions: [
       {
         q: "A £40 hoodie has 25% off. How much money do you save?",
@@ -345,7 +413,7 @@ const CONTENT = [
     ]
   },
   {
-    id: "ratio", icon: "⚖️", name: "Ratio",
+    id: "ratio", icon: "⚖️", name: "Ratio", free: true,
     questions: [
       {
         q: "Share £60 in the ratio 2:3. How much is the bigger share?",
@@ -805,7 +873,9 @@ const els = {
   deeperBox: $('deeperBox'), deeperText: $('deeperText'),
   deeperBtn: $('deeperBtn'), nextBtn: $('nextBtn'),
   sumScore: $('sumScore'), sumMsg: $('sumMsg'),
-  retryBtn: $('retryBtn'), homeBtn: $('homeBtn')
+  retryBtn: $('retryBtn'), homeBtn: $('homeBtn'),
+  auth: $('auth'), paywall: $('paywall'), accountArea: $('accountArea'),
+  authEmail: $('authEmail'), authFeedback: $('authFeedback')
 };
 
 function shuffle(arr) {
@@ -816,6 +886,35 @@ function shuffle(arr) {
   return arr;
 }
 
+// ───────────────────────── Account (PROTOTYPE) ─────────────────────────
+// Stored in localStorage only — there is no password and no server. In production,
+// sign-in goes through an auth provider (e.g. Supabase) and `premium` must be read
+// from your backend, never trusted from the browser.
+const Account = {
+  data: JSON.parse(localStorage.getItem('ml_account') || 'null'), // { email, premium } | null
+  isSignedIn() { return !!this.data; },
+  isPremium() { return !!(this.data && this.data.premium); },
+  signIn(email) {
+    const users = JSON.parse(localStorage.getItem('ml_users') || '{}');
+    if (!users[email]) users[email] = { email, premium: false };
+    localStorage.setItem('ml_users', JSON.stringify(users));
+    this.data = users[email];
+    this._save();
+  },
+  signOut() { this.data = null; localStorage.removeItem('ml_account'); },
+  setPremium(v) {
+    if (!this.data) return;
+    this.data.premium = v;
+    const users = JSON.parse(localStorage.getItem('ml_users') || '{}');
+    users[this.data.email] = this.data;
+    localStorage.setItem('ml_users', JSON.stringify(users));
+    this._save();
+  },
+  _save() { localStorage.setItem('ml_account', JSON.stringify(this.data)); }
+};
+function isLocked(topic) { return !topic.free && !Account.isPremium(); }
+let afterAuth = null; // callback to run after a successful sign-in
+
 function refreshStats() {
   els.points.textContent = store.points;
   els.streak.textContent = liveStreak;
@@ -825,24 +924,88 @@ function refreshStats() {
 }
 
 function show(section) {
-  els.home.classList.add('hidden');
-  els.quiz.classList.add('hidden');
-  els.summary.classList.add('hidden');
+  [els.home, els.quiz, els.summary, els.auth, els.paywall].forEach(s => s.classList.add('hidden'));
   section.classList.remove('hidden');
   window.scrollTo(0, 0);
 }
 
+// ───────────────────────── Account UI / auth / paywall ─────────────────────────
+function renderAccount() {
+  els.accountArea.innerHTML = '';
+  if (Account.isSignedIn()) {
+    const tag = document.createElement('span');
+    tag.className = 'stat' + (Account.isPremium() ? ' premiumPill' : '');
+    const emailSpan = document.createElement('span');
+    emailSpan.className = 'email';
+    emailSpan.textContent = Account.data.email;
+    tag.append(document.createTextNode(Account.isPremium() ? '✦ Premium · ' : '👤 '), emailSpan);
+    const out = document.createElement('button');
+    out.className = 'back'; out.textContent = 'Sign out';
+    out.addEventListener('click', () => { Account.signOut(); renderHome(); });
+    els.accountArea.append(tag, out);
+  } else {
+    const inBtn = document.createElement('button');
+    inBtn.className = 'back'; inBtn.textContent = 'Sign in';
+    inBtn.addEventListener('click', () => openAuth());
+    els.accountArea.append(inBtn);
+  }
+}
+
+function openAuth(next) {
+  afterAuth = next || null;
+  els.authEmail.value = Account.isSignedIn() ? Account.data.email : '';
+  els.authFeedback.textContent = '';
+  show(els.auth);
+  setTimeout(() => els.authEmail.focus(), 50);
+}
+
+function submitAuth() {
+  const email = els.authEmail.value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    els.authFeedback.textContent = 'Please enter a valid email address.';
+    return;
+  }
+  Account.signIn(email);
+  const cb = afterAuth; afterAuth = null;
+  renderAccount();
+  if (cb) cb(); else renderHome();
+}
+
+function openPaywall() { show(els.paywall); }
+
+function choosePlan(plan) {
+  // Real version: redirect to Stripe Checkout for `plan`, then unlock only after the
+  // server confirms payment (via webhook) and the client re-reads entitlement.
+  if (!Account.isSignedIn()) { openAuth(() => openPaywall()); return; }
+  startCheckout(plan);
+}
+
+function startCheckout(plan) {
+  Account.setPremium(true); // PROTOTYPE: instant unlock; production waits for Stripe.
+  renderHome();
+  celebrate();
+}
+
 // ───────────────────────── Home ─────────────────────────
 function renderHome() {
+  renderAccount();
   els.grid.innerHTML = '';
   CONTENT.forEach(topic => {
+    const locked = isLocked(topic);
     const b = document.createElement('button');
-    b.className = 'topic';
+    b.className = 'topic' + (locked ? ' locked' : '');
     const ico = document.createElement('span'); ico.className = 'ico'; ico.textContent = topic.icon;
     const name = document.createElement('div'); name.className = 'name'; name.textContent = topic.name;
-    const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = topic.questions.length + ' questions';
+    const meta = document.createElement('div'); meta.className = 'meta';
+    meta.textContent = locked ? '🔒 Premium' : topic.questions.length + ' questions';
     b.append(ico, name, meta);
-    b.addEventListener('click', () => startTopic(topic));
+    if (locked) {
+      const lock = document.createElement('span'); lock.className = 'lock'; lock.textContent = '🔒';
+      b.appendChild(lock);
+      b.addEventListener('click', openPaywall);
+    } else {
+      b.addEventListener('click', () => startTopic(topic));
+    }
     els.grid.appendChild(b);
   });
   show(els.home);
@@ -1001,7 +1164,15 @@ $('backBtn').addEventListener('click', renderHome);
 els.retryBtn.addEventListener('click', () => startTopic(state.topic));
 els.homeBtn.addEventListener('click', renderHome);
 
+$('authSubmit').addEventListener('click', submitAuth);
+els.authEmail.addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(); });
+$('authCancel').addEventListener('click', renderHome);
+$('paywallClose').addEventListener('click', renderHome);
+document.querySelectorAll('.plan').forEach(p =>
+  p.addEventListener('click', () => choosePlan(p.dataset.plan)));
+
 refreshStats();
+renderAccount();
 renderHome();
 </script>
 </body>
