@@ -42,7 +42,31 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
   return a;
 }
 
-export default function Quiz({ topic }: { topic: Topic }) {
+// Rough, clearly-labelled GCSE grade estimate from a percentage. Real boundaries
+// vary by exam board, tier and year — this is only an indicator.
+function estimateGrade(pct: number): number {
+  const bands = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2];
+  for (let i = 0; i < bands.length; i++) {
+    if (pct >= bands[i]) return 9 - i;
+  }
+  return 1;
+}
+
+function gradeMessage(grade: number): string {
+  if (grade >= 7) return "Excellent — that's a strong pass.";
+  if (grade >= 4) return "Nice work — that's around a standard pass.";
+  return "Keep practising and run another paper — you'll climb fast.";
+}
+
+export default function Quiz({
+  topic,
+  examMode = false,
+  newPaperHref,
+}: {
+  topic: Topic;
+  examMode?: boolean;
+  newPaperHref?: string;
+}) {
   const [qi, setQi] = useState(0);
   const [answered, setAnswered] = useState(false);
   const [picked, setPicked] = useState<number | null>(null);
@@ -164,8 +188,8 @@ export default function Quiz({ topic }: { topic: Topic }) {
 
   if (done) {
     const total = topic.questions.length;
-    const pct = score / total;
-    const msg =
+    const pct = total ? score / total : 0;
+    const topicMsg =
       pct === 1
         ? "Perfect! You've nailed this topic. 🌟"
         : pct >= 0.75
@@ -173,18 +197,43 @@ export default function Quiz({ topic }: { topic: Topic }) {
           : pct >= 0.5
             ? "Good effort! Review the concepts and try again."
             : "Tricky one — read the analogies and have another go. You've got this.";
+    const grade = estimateGrade(pct);
     return (
       <div style={{ textAlign: "center" }}>
-        <h1>Topic complete! 🎉</h1>
+        <h1>{examMode ? "Paper complete! 📝" : "Topic complete! 🎉"}</h1>
         <div style={{ fontSize: 46, fontWeight: 900, color: "var(--good)", margin: "8px 0" }}>
           {score} / {total}
+          {examMode ? " marks" : ""}
         </div>
-        <p className="sub">{msg}</p>
+        {examMode ? (
+          <>
+            <div className="gradePill">≈ Grade {grade}</div>
+            <p className="sub">
+              {Math.round(pct * 100)}% · {gradeMessage(grade)}
+            </p>
+            <p className="note">
+              Rough guide only — real grade boundaries vary by exam board, tier and year.
+            </p>
+          </>
+        ) : (
+          <p className="sub">{topicMsg}</p>
+        )}
         {saved === "done" && <p className="msg good">✓ Progress saved</p>}
         <div className="actions" style={{ justifyContent: "center" }}>
-          <button className="btn" onClick={restart}>
-            ↻ Try again
-          </button>
+          {examMode && newPaperHref ? (
+            <>
+              <a className="btn primary" href={newPaperHref}>
+                ↻ New paper
+              </a>
+              <button className="btn" onClick={restart}>
+                Review this paper
+              </button>
+            </>
+          ) : (
+            <button className="btn" onClick={restart}>
+              ↻ Try again
+            </button>
+          )}
         </div>
       </div>
     );

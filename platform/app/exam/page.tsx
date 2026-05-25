@@ -21,7 +21,7 @@ export default async function ExamPage() {
           ← Topics
         </Link>
       </div>
-      <Quiz topic={exam} />
+      <Quiz topic={exam} examMode newPaperHref="/exam" />
     </main>
   );
 }
