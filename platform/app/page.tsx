@@ -106,6 +106,25 @@ export default async function Landing() {
         </ol>
       </section>
 
+      <section className="card parents">
+        <span className="kicker">For parents</span>
+        <h2 style={{ marginTop: 10 }}>Help with maths — even if you can&apos;t remember it yourself</h2>
+        <p>
+          You don&apos;t need to be a maths whiz. Every question explains itself, so your child gets
+          unstuck without waiting for you — and you can see exactly what they&apos;re practising.
+        </p>
+        <ul className="perks">
+          <li>Built around the GCSE foundations that trip most students up</li>
+          <li>Calm, encouraging feedback — no red crosses, no pressure</li>
+          <li>You stay in control: cancel in two clicks, anytime</li>
+          <li>Less than the price of a coffee a month</li>
+        </ul>
+        <p className="note">
+          A private maths tutor is typically £25–£40 an hour. GCSE Maths Lab is{" "}
+          <strong>£4.99 a month</strong> — and it&apos;s there every evening, not just once a week.
+        </p>
+      </section>
+
       <section className="card" id="pricing">
         <h2 style={{ marginTop: 0 }}>Simple pricing</h2>
         <p className="sub">Try everything free for 7 days. Cancel any time before then and pay nothing.</p>

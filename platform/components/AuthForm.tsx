@@ -4,14 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-// Email + password sign-in / sign-up via Supabase Auth.
+type Mode = "signin" | "signup" | "reset";
+
+// Email + password sign-in / sign-up via Supabase Auth, plus a password-reset path.
 // (Magic-link / OAuth are easy alternatives — see supabase.auth.signInWithOtp / signInWithOAuth.)
 export default function AuthForm() {
   const router = useRouter();
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<Mode>("signin");
   const [msg, setMsg] = useState<{ text: string; bad?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -20,7 +22,13 @@ export default function AuthForm() {
     setBusy(true);
     setMsg(null);
     try {
-      if (mode === "signup") {
+      if (mode === "reset") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        setMsg({ text: "Check your email for a link to reset your password." });
+      } else if (mode === "signup") {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         setMsg({ text: "Check your email to confirm your account, then sign in." });
@@ -36,6 +44,9 @@ export default function AuthForm() {
     }
   }
 
+  const submitLabel =
+    mode === "signup" ? "Create account →" : mode === "reset" ? "Send reset link →" : "Sign in →";
+
   return (
     <form onSubmit={submit}>
       <label htmlFor="email">Email</label>
@@ -48,32 +59,69 @@ export default function AuthForm() {
         placeholder="you@example.com"
         required
       />
-      <label htmlFor="password">Password</label>
-      <input
-        id="password"
-        type="password"
-        autoComplete={mode === "signup" ? "new-password" : "current-password"}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="••••••••"
-        minLength={6}
-        required
-      />
+      {mode !== "reset" && (
+        <>
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            minLength={6}
+            required
+          />
+        </>
+      )}
+      {mode === "signin" && (
+        <button
+          type="button"
+          onClick={() => {
+            setMode("reset");
+            setMsg(null);
+          }}
+          style={{
+            background: "none",
+            border: "none",
+            color: "var(--accent)",
+            cursor: "pointer",
+            padding: 0,
+            fontSize: 13,
+            marginBottom: 10,
+          }}
+        >
+          Forgot password?
+        </button>
+      )}
       {msg && <p className={"msg " + (msg.bad ? "bad" : "good")}>{msg.text}</p>}
       <div className="actions">
         <button className="btn primary" type="submit" disabled={busy}>
-          {busy ? "…" : mode === "signup" ? "Create account →" : "Sign in →"}
+          {busy ? "…" : submitLabel}
         </button>
-        <button
-          type="button"
-          className="btn"
-          onClick={() => {
-            setMode(mode === "signup" ? "signin" : "signup");
-            setMsg(null);
-          }}
-        >
-          {mode === "signup" ? "Have an account? Sign in" : "New here? Create account"}
-        </button>
+        {mode === "reset" ? (
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              setMode("signin");
+              setMsg(null);
+            }}
+          >
+            ← Back to sign in
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              setMode(mode === "signup" ? "signin" : "signup");
+              setMsg(null);
+            }}
+          >
+            {mode === "signup" ? "Have an account? Sign in" : "New here? Create account"}
+          </button>
+        )}
       </div>
     </form>
   );

@@ -30,6 +30,7 @@ Don't run it yet — first we need your keys (Parts 2–4).
   - **service_role** key  *(secret — treat like a password)*
 - [ ] In the left sidebar: **SQL Editor → New query**. Open the file `platform/supabase/schema.sql`, copy **all** of it, paste it in, and press **Run**. You should see "Success". *(This builds the tables that remember who has paid and each learner's progress. It's safe to re-run any time if the file changes.)*
 - [ ] In the left sidebar: **Authentication → Providers → Email** → make sure it's **enabled**. While testing, you can switch **off** "Confirm email" so sign-up logs you straight in.
+- [ ] In **Authentication → URL Configuration**, set the **Site URL** (e.g. `http://localhost:3000` for now, your Vercel URL later) and add both `http://localhost:3000/reset-password` and `https://YOUR-VERCEL-URL/reset-password` to **Redirect URLs**. *(This lets the "forgot password" email link return to your app.)*
 
 ---
 
