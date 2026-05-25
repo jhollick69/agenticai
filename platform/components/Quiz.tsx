@@ -15,6 +15,33 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+// Deterministic shuffle so the server and client render the same option order
+// (no hydration mismatch). The seed changes per question and per attempt, so it
+// still feels random and reshuffles on "try again".
+function seedFrom(topicId: string, qi: number, epoch: number): number {
+  let h = 2166136261;
+  const str = `${topicId}:${qi}:${epoch}`;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function seededShuffle<T>(arr: T[], seed: number): T[] {
+  const a = [...arr];
+  let s = seed >>> 0;
+  const rand = () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+  for (let n = a.length - 1; n > 0; n--) {
+    const r = Math.floor(rand() * (n + 1));
+    [a[n], a[r]] = [a[r], a[n]];
+  }
+  return a;
+}
+
 export default function Quiz({ topic }: { topic: Topic }) {
   const [qi, setQi] = useState(0);
   const [answered, setAnswered] = useState(false);
@@ -27,6 +54,7 @@ export default function Quiz({ topic }: { topic: Topic }) {
   const [streak, setStreak] = useState(0);
   const [done, setDone] = useState(false);
   const [saved, setSaved] = useState<"idle" | "saving" | "done">("idle");
+  const [epoch, setEpoch] = useState(0);
 
   // When a topic is finished, save the result for signed-in users (keeping their
   // best score). Signed-out players simply aren't saved — no error, no nag.
@@ -76,9 +104,13 @@ export default function Quiz({ topic }: { topic: Topic }) {
 
   // Reshuffle options whenever the question changes.
   const options: Shuffled[] = useMemo(
-    () => shuffle(q.options.map((text, i) => ({ text, isCorrect: i === q.correct }))),
+    () =>
+      seededShuffle(
+        q.options.map((text, i) => ({ text, isCorrect: i === q.correct })),
+        seedFrom(topic.id, qi, epoch),
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [qi, topic.id],
+    [qi, topic.id, epoch],
   );
   const correctIndex = options.findIndex((o) => o.isCorrect);
 
@@ -127,6 +159,7 @@ export default function Quiz({ topic }: { topic: Topic }) {
     setStreak(0);
     setDone(false);
     setSaved("idle");
+    setEpoch((e) => e + 1);
   }
 
   if (done) {

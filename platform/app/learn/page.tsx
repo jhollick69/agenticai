@@ -2,11 +2,13 @@ import Link from "next/link";
 import { TOPICS } from "@/lib/content";
 import { getEntitlement } from "@/lib/entitlement";
 import { getProgressMap } from "@/lib/progress";
+import { MOCK_EXAM_ID } from "@/lib/exam";
 
 // The app itself: the topic grid. Premium topics are locked based on the
 // server-verified entitlement.
 export default async function Learn() {
   const [ent, progress] = await Promise.all([getEntitlement(), getProgressMap()]);
+  const examProg = progress[MOCK_EXAM_ID];
 
   return (
     <main className="card">
@@ -42,6 +44,22 @@ export default async function Learn() {
           );
         })}
       </div>
+
+      <Link href={ent.isPremium ? "/exam" : "/account?upgrade=1"} className="examCard">
+        <span className="examIco">📝</span>
+        <span className="examBody">
+          <span className="examTitle">Mock Exam {!ent.isPremium && "🔒"}</span>
+          <span className="examMeta">
+            {!ent.isPremium
+              ? "Premium · 12 mixed questions"
+              : examProg
+                ? `Best ${examProg.best_score}/${examProg.total} · 12 mixed questions`
+                : "12 mixed questions from every topic"}
+          </span>
+        </span>
+        <span className="examGo">{ent.isPremium ? "Start →" : "Unlock →"}</span>
+      </Link>
+
       {!ent.isPremium && (
         <div className="actions">
           <Link href="/account?upgrade=1" className="btn primary">
