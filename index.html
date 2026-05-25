@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>GCSE Maths 3D Cram Lab</title>
+<title>GCSE Maths — Quiz Lab</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
   :root {
@@ -14,1577 +14,681 @@
     --accent: #6ee7ff;
     --accent2: #ff7ae0;
     --good: #7dffb0;
+    --bad: #ff6b8a;
     --warn: #ffd166;
+    --line: #2a3470;
   }
   * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
+  html, body { margin: 0; min-height: 100%; }
   body {
     background: radial-gradient(1200px 800px at 80% -10%, #1c2659 0%, var(--bg) 60%) fixed;
     color: var(--ink);
-    font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    overflow: hidden;
+    font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 18px 14px 60px;
   }
-  #app { display: grid; grid-template-columns: 280px 1fr; height: 100vh; }
-  aside {
-    background: var(--panel);
-    border-right: 1px solid #222a55;
-    padding: 14px;
-    overflow-y: auto;
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  /* Top bar */
+  .topbar {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 18px; flex-wrap: wrap;
   }
-  h1 {
-    font-size: 16px;
-    margin: 0 0 10px;
-    letter-spacing: .3px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .tabs { display: grid; gap: 6px; margin-bottom: 14px; }
-  .tab {
-    background: var(--panel2);
-    color: var(--ink);
-    border: 1px solid #2a3470;
-    padding: 9px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    text-align: left;
-    font-size: 13px;
-  }
-  .tab:hover { border-color: var(--accent); }
-  .tab.active {
-    background: linear-gradient(90deg, rgba(110,231,255,.18), rgba(255,122,224,.18));
-    border-color: var(--accent);
-  }
-  .group { margin-bottom: 14px; }
-  .group h2 {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--muted);
-    margin: 4px 0 6px;
-  }
-  label { display: block; font-size: 12px; color: var(--muted); margin: 6px 0 2px; }
-  input[type=range] { width: 100%; }
-  input[type=text], select {
-    width: 100%;
-    background: #0e1430;
-    border: 1px solid #2a3470;
-    color: var(--ink);
-    padding: 6px 8px;
-    border-radius: 6px;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 12px;
-  }
-  .row { display: flex; gap: 6px; }
-  .row > * { flex: 1; }
-  button.act {
-    background: var(--panel2);
-    color: var(--ink);
-    border: 1px solid #2a3470;
-    padding: 6px 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-  }
-  button.act:hover { border-color: var(--accent); }
-  button.act.primary {
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    color: #0b1020;
-    border: none;
-    font-weight: 600;
-  }
-  .pill {
-    display: inline-block;
-    padding: 2px 7px;
-    border-radius: 999px;
-    background: #0e1430;
-    border: 1px solid #2a3470;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 11px;
-    color: var(--accent);
-  }
-  main { position: relative; }
-  canvas { display: block; }
-  #hud {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 340px;
-    background: rgba(19, 26, 51, .9);
-    backdrop-filter: blur(10px);
-    border: 1px solid #2a3470;
-    border-radius: 14px;
-    padding: 14px 16px;
-    font-size: 15px;
-    line-height: 1.55;
-  }
-  #hud h3 {
-    margin: 0 0 4px;
-    font-size: 18px;
-    color: var(--accent);
-    letter-spacing: .5px;
-  }
-  #hud .tagline {
-    color: var(--muted);
-    font-size: 12px;
-    margin-bottom: 10px;
-  }
-  #hud .formula {
-    font-family: ui-monospace, Menlo, monospace;
-    color: var(--ink);
-    background: #0e1430;
-    border: 1px solid #2a3470;
-    padding: 8px 10px;
-    border-radius: 8px;
-    margin: 6px 0;
-    white-space: pre-wrap;
-    font-size: 13px;
-  }
-  #hud .big {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--good);
-    font-family: ui-monospace, Menlo, monospace;
-  }
-  #hud .v { color: var(--good); }
-  #hud .w { color: var(--warn); }
-  /* Top streak bar */
-  #topbar {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    background: rgba(19, 26, 51, .85);
-    backdrop-filter: blur(10px);
-    border: 1px solid #2a3470;
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-size: 13px;
-  }
-  #topbar .stat { color: var(--ink); font-family: ui-monospace, Menlo, monospace; }
-  #topbar .stat b { color: var(--accent); }
-  #topbar .streak b { color: var(--warn); }
-  /* Quiz overlay */
-  #quiz {
-    position: absolute;
-    inset: 0;
-    background: rgba(11, 16, 32, .75);
-    backdrop-filter: blur(6px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-  }
-  #quiz.show { display: flex; }
-  #quiz .card {
-    background: var(--panel);
-    border: 1px solid var(--accent);
-    border-radius: 16px;
-    padding: 24px 28px;
-    width: min(440px, 92vw);
-    box-shadow: 0 20px 60px rgba(0,0,0,.5);
-  }
-  #quiz h2 {
-    margin: 0 0 6px;
-    font-size: 22px;
+  .brand {
+    font-size: 20px; font-weight: 800; letter-spacing: .3px;
     background: linear-gradient(90deg, var(--accent), var(--accent2));
     -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-right: auto;
   }
-  #quiz .q {
-    font-size: 16px;
-    margin: 10px 0 14px;
-    line-height: 1.5;
+  .stat {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 12px; font-size: 14px; font-weight: 700;
+    display: inline-flex; gap: 6px; align-items: center;
   }
-  #quiz input[type=text] {
-    font-size: 18px;
-    padding: 10px 12px;
+  .stat .v { color: var(--good); }
+  .stat.streak .v { color: var(--warn); }
+  .stat.best .v { color: var(--accent2); }
+
+  /* Cards / panels */
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,.25);
   }
-  #quiz .feedback {
-    min-height: 28px;
-    margin-top: 10px;
-    font-weight: 600;
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+
+  /* Topic grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .topic {
+    background: var(--panel2); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px; cursor: pointer; text-align: left;
+    color: var(--ink); transition: transform .12s ease, border-color .12s ease;
   }
-  #quiz .feedback.ok { color: var(--good); }
-  #quiz .feedback.no { color: #ff7a7a; }
-  #quiz .how {
-    margin-top: 8px;
-    background: #0e1430;
-    border: 1px solid #2a3470;
-    border-radius: 8px;
-    padding: 8px 10px;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--ink);
-    white-space: pre-wrap;
-    line-height: 1.7;
+  .topic:hover { transform: translateY(-3px); border-color: var(--accent); }
+  .topic .ico { font-size: 30px; display: block; margin-bottom: 8px; }
+  .topic .name { font-weight: 700; font-size: 15px; }
+  .topic .meta { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+  /* Quiz header */
+  .qhead { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .back {
+    background: var(--panel2); border: 1px solid var(--line); color: var(--ink);
+    border-radius: 10px; padding: 8px 12px; cursor: pointer; font-size: 14px;
   }
-  #quiz .how b { color: var(--accent); }
-  /* Celebration */
+  .back:hover { border-color: var(--accent); }
+  .progress { color: var(--muted); font-size: 13px; margin-left: auto; }
+  .bar { height: 6px; background: var(--panel2); border-radius: 999px; overflow: hidden; margin-bottom: 18px; }
+  .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .3s ease; }
+
+  .qtext { font-size: 19px; font-weight: 700; line-height: 1.4; margin: 4px 0 18px; }
+
+  /* Options */
+  .opts { display: grid; gap: 10px; }
+  .opt {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--panel2); border: 2px solid var(--line); color: var(--ink);
+    border-radius: 12px; padding: 14px 16px; cursor: pointer; font-size: 16px;
+    text-align: left; transition: border-color .12s, background .12s, opacity .2s;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--accent); }
+  .opt .key {
+    flex: 0 0 28px; height: 28px; border-radius: 8px; background: #0e1430;
+    border: 1px solid var(--line); display: grid; place-items: center;
+    font-weight: 800; font-size: 14px; color: var(--accent);
+  }
+  .opt.correct { border-color: var(--good); background: rgba(125,255,176,.12); }
+  .opt.correct .key { color: var(--good); border-color: var(--good); }
+  .opt.wrong { border-color: var(--bad); background: rgba(255,107,138,.12); }
+  .opt.wrong .key { color: var(--bad); border-color: var(--bad); }
+  .opt.dimmed { opacity: .28; pointer-events: none; }
+  .opt:disabled { cursor: default; }
+
+  /* Lifelines */
+  .lifelines { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .life {
+    background: var(--panel2); border: 1px solid var(--line); color: var(--ink);
+    border-radius: 10px; padding: 9px 14px; cursor: pointer; font-size: 14px; font-weight: 600;
+    display: inline-flex; gap: 6px; align-items: center;
+  }
+  .life:hover:not(:disabled) { border-color: var(--accent2); }
+  .life:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* Reveal boxes */
+  .box { border-radius: 12px; padding: 14px 16px; margin-top: 14px; font-size: 15px; line-height: 1.55; }
+  .box h4 { margin: 0 0 6px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+  .box.analogy { background: rgba(255,209,102,.10); border: 1px solid rgba(255,209,102,.4); }
+  .box.analogy h4 { color: var(--warn); }
+  .box.concept { background: rgba(110,231,255,.08); border: 1px solid rgba(110,231,255,.35); }
+  .box.concept h4 { color: var(--accent); }
+  .box.deeper { background: rgba(255,122,224,.08); border: 1px solid rgba(255,122,224,.35); }
+  .box.deeper h4 { color: var(--accent2); }
+  .box.hidden { display: none; }
+
+  .feedback { font-weight: 800; font-size: 17px; margin-top: 16px; min-height: 4px; }
+  .feedback.ok { color: var(--good); }
+  .feedback.no { color: var(--bad); }
+
+  .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .btn {
+    background: var(--panel2); border: 1px solid var(--line); color: var(--ink);
+    border-radius: 10px; padding: 11px 18px; cursor: pointer; font-size: 15px; font-weight: 600;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #0b1020; border: none; font-weight: 800;
+  }
+  .btn.hidden { display: none; }
+
+  /* Summary */
+  .summary { text-align: center; }
+  .summary .score { font-size: 46px; font-weight: 900; color: var(--good); margin: 8px 0; }
+  .summary .msg { color: var(--muted); margin-bottom: 18px; }
+
+  .hidden { display: none; }
+
+  /* Confetti */
   .burst {
-    position: absolute;
-    pointer-events: none;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    z-index: 20;
-    animation: burst 700ms ease-out forwards;
+    position: fixed; width: 10px; height: 10px; border-radius: 2px;
+    pointer-events: none; z-index: 50;
+    animation: pop .8s ease-out forwards;
   }
-  @keyframes burst {
-    0% { transform: translate(0,0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+  @keyframes pop {
+    to { transform: translate(var(--dx), var(--dy)) rotate(320deg); opacity: 0; }
   }
-  #hint {
-    position: absolute;
-    left: 14px;
-    bottom: 14px;
-    color: var(--muted);
-    font-size: 11px;
-    background: rgba(19, 26, 51, .75);
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: 1px solid #2a3470;
+
+  @media (max-width: 480px) {
+    body { font-size: 15px; }
+    .qtext { font-size: 18px; }
+    .grid { grid-template-columns: repeat(2, 1fr); }
   }
-  details > summary { cursor: pointer; color: var(--muted); font-size: 12px; margin-top: 6px; }
-  .kv { display: flex; justify-content: space-between; gap: 8px; }
-  .kv span:last-child { color: var(--good); font-family: ui-monospace, Menlo, monospace; }
 </style>
 </head>
 <body>
-<div id="app">
-  <aside>
-    <h1>GCSE Maths · 3D Cram Lab</h1>
-    <div class="tabs" id="tabs">
-      <button class="tab active" data-mod="shapes">📦 Shapes — V & SA</button>
-      <button class="tab" data-mod="pyth">📐 Pythagoras 3D & Trig</button>
-      <button class="tab" data-mod="graph">📈 Graph Plotter</button>
-      <button class="tab" data-mod="trans">🔄 Transformations</button>
-      <button class="tab" data-mod="trig">📏 Trig (SOHCAHTOA)</button>
-      <button class="tab" data-mod="circ">⭕ Circles & Sectors</button>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">🧮 GCSE Maths Lab</div>
+    <div class="stat">⭐ <span class="v" id="points">0</span></div>
+    <div class="stat streak">🔥 <span class="v" id="streak">0</span></div>
+    <div class="stat best">🏆 <span class="v" id="best">0</span></div>
+  </div>
+
+  <!-- HOME -->
+  <section id="home" class="card">
+    <h1>Pick a topic 🚀</h1>
+    <p class="sub">Fun, bite-size questions. Stuck? Tap <b>50/50</b> to halve your options or <b>🤔 Confused?</b> for a plain-English analogy. After each answer you get the concept — and a <b>Deeper dive</b> if you want more.</p>
+    <div class="grid" id="topicGrid"></div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="card hidden">
+    <div class="qhead">
+      <button class="back" id="backBtn">← Topics</button>
+      <span class="progress" id="progress"></span>
     </div>
-    <div id="controls"></div>
-    <details>
-      <summary>Tips</summary>
-      <div style="color:var(--muted); font-size:12px; margin-top:6px">
-        Drag to orbit · scroll to zoom · right-drag to pan. Switch topics with the buttons above.
-      </div>
-    </details>
-  </aside>
-  <main>
-    <div id="topbar">
-      <div class="stat">⭐ <b id="points">0</b></div>
-      <div class="stat streak">🔥 <b id="streak">0</b></div>
-      <div class="stat" style="color:var(--muted)">best <b id="best" style="color:var(--accent2)">0</b></div>
+    <div class="bar"><i id="barFill"></i></div>
+
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+
+    <div class="lifelines">
+      <button class="life" id="fiftyBtn">⚖️ 50/50</button>
+      <button class="life" id="confusedBtn">🤔 Confused?</button>
     </div>
-    <div id="hud"></div>
-    <div id="quiz"><div class="card">
-      <h2 id="qTitle">Quick Challenge!</h2>
-      <div class="q" id="qText"></div>
-      <input type="text" id="qInput" placeholder="Type your answer…" autocomplete="off" />
-      <div class="row" style="margin-top:10px; gap:8px; display:flex">
-        <button class="act primary" id="qSubmit" style="flex:1">Submit ✓</button>
-        <button class="act" id="qSkip">Skip</button>
-        <button class="act" id="qClose">✕</button>
-      </div>
-      <div class="feedback" id="qFeedback"></div>
-    </div></div>
-    <div id="hint">Drag to rotate · scroll to zoom · right-click drag to pan</div>
-  </main>
+
+    <div class="box analogy hidden" id="analogyBox">
+      <h4>🤔 Simple analogy</h4>
+      <div id="analogyText"></div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="box concept hidden" id="conceptBox">
+      <h4>💡 The concept</h4>
+      <div id="conceptText"></div>
+    </div>
+
+    <div class="box deeper hidden" id="deeperBox">
+      <h4>🔍 Deeper dive</h4>
+      <div id="deeperText"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn hidden" id="deeperBtn">🔍 Deeper dive</button>
+      <button class="btn primary hidden" id="nextBtn">Next →</button>
+    </div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section id="summary" class="card summary hidden">
+    <h1 id="sumTitle">Topic complete! 🎉</h1>
+    <div class="score" id="sumScore">0 / 0</div>
+    <p class="msg" id="sumMsg"></p>
+    <div class="actions" style="justify-content:center">
+      <button class="btn" id="retryBtn">↻ Try again</button>
+      <button class="btn primary" id="homeBtn">Back to topics →</button>
+    </div>
+  </section>
+
 </div>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-  }
-}
-</script>
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-// ───────────────────────── Scene plumbing ─────────────────────────
-const main = document.querySelector('main');
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
-main.appendChild(renderer.domElement);
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0b1020);
-scene.fog = new THREE.Fog(0x0b1020, 30, 80);
-
-const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
-camera.position.set(8, 7, 10);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-
-scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-const sun = new THREE.DirectionalLight(0xffffff, 0.9);
-sun.position.set(8, 12, 6);
-scene.add(sun);
-const rim = new THREE.DirectionalLight(0xff7ae0, 0.35);
-rim.position.set(-6, 4, -8);
-scene.add(rim);
-
-// Grid + axes (always visible, cosmetic)
-const grid = new THREE.GridHelper(20, 20, 0x2a3470, 0x1b2347);
-scene.add(grid);
-const axes = new THREE.AxesHelper(5);
-scene.add(axes);
-
-function resize() {
-  const w = main.clientWidth, h = main.clientHeight;
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-}
-window.addEventListener('resize', resize);
-resize();
-
-// Group that each module fills with its own meshes
-const stage = new THREE.Group();
-scene.add(stage);
-function clearStage() {
-  while (stage.children.length) {
-    const c = stage.children.pop();
-    c.traverse?.(o => {
-      o.geometry?.dispose?.();
-      if (o.material) {
-        if (Array.isArray(o.material)) o.material.forEach(m => m.dispose());
-        else o.material.dispose();
+<script>
+// ───────────────────────── CONTENT (data-driven: add topics/subjects here) ─────────────────────────
+const CONTENT = [
+  {
+    id: "fractions", icon: "🍕", name: "Fractions",
+    questions: [
+      {
+        q: "You eat 3/8 of a pizza and your mate eats 2/8. How much pizza is gone?",
+        options: ["5/8", "5/16", "1/8", "6/8"], correct: 0,
+        concept: "To add fractions with the same denominator (bottom number), just add the tops and keep the bottom the same.",
+        deeper: "The denominator tells you how many equal slices the whole is cut into; it doesn't change when you combine pieces of the same size. So 3 eighths + 2 eighths = 5 eighths. If the bottoms were different, you'd rewrite them over a common denominator first, e.g. 1/2 + 1/3 = 3/6 + 2/6 = 5/6.",
+        analogy: "Slices are slices. If a pizza is cut into 8 and you eat 3 then 2, that's 5 slices gone. You don't suddenly recount how many slices the pizza was cut into."
+      },
+      {
+        q: "What is 2/3 of 18?",
+        options: ["12", "6", "9", "27"], correct: 0,
+        concept: "To find a fraction of a number: divide by the bottom, then multiply by the top.",
+        deeper: "Split 18 into equal parts: 18 ÷ 3 = 6 (that's one third). Two thirds = 2 × 6 = 12. In general, a/b of N = (N ÷ b) × a.",
+        analogy: "Imagine 18 sweets shared into 3 equal piles (6 each). 'Two thirds' means you grab 2 of those piles = 12 sweets."
+      },
+      {
+        q: "Which fraction is the same as 1/2?",
+        options: ["4/8", "2/3", "3/8", "5/9"], correct: 0,
+        concept: "Equivalent fractions are equal in value — you make them by multiplying (or dividing) top and bottom by the same number.",
+        deeper: "1/2 = 2/4 = 4/8 = 50/100. Multiplying top and bottom by 4 gives 4/8, and 4 ÷ 8 = 0.5 = 1/2. To check if two fractions match, cross-multiply: 1×8 = 2×4 ✓.",
+        analogy: "Cutting a cake into 2 and taking 1 piece is the same amount as cutting it into 8 and taking 4. Same cake, just sliced more finely."
+      },
+      {
+        q: "Work out 3/4 − 1/2.",
+        options: ["1/4", "2/2", "1/2", "2/6"], correct: 0,
+        concept: "To add or subtract fractions, make the denominators match first, then work with the tops.",
+        deeper: "1/2 = 2/4, so 3/4 − 2/4 = 1/4. The common denominator is the smallest number both bottoms divide into (here, 4). Never subtract the bottoms — that's how people wrongly get 2/6.",
+        analogy: "You can't fairly compare quarters with halves until the pieces are the same size. Turn the half into 2 quarters, then it's just 3 quarters take away 2 quarters = 1 quarter."
       }
-    });
+    ]
+  },
+  {
+    id: "percentages", icon: "💯", name: "Percentages",
+    questions: [
+      {
+        q: "A £40 hoodie has 25% off. How much money do you save?",
+        options: ["£10", "£15", "£30", "£25"], correct: 0,
+        concept: "A percentage is just a fraction out of 100. 'Per cent' literally means 'per hundred'.",
+        deeper: "25% = 25/100 = 1/4. So 25% of £40 = £40 ÷ 4 = £10. The sale price would be £40 − £10 = £30. For any percentage: divide by 100 then multiply by the percent, i.e. 40 ÷ 100 × 25 = 10.",
+        analogy: "Percent means 'out of every 100'. 25% says 'for every £100 you'd save £25'. £40 is 0.4 of £100, so you save 0.4 × £25 = £10."
+      },
+      {
+        q: "What is 10% of 250?",
+        options: ["25", "2.5", "250", "50"], correct: 0,
+        concept: "Finding 10% is easy — just divide by 10 (move the decimal point one place to the left).",
+        deeper: "10% = 1/10, so 10% of 250 = 250 ÷ 10 = 25. Handy trick: once you have 10% you can build others — 5% is half of it (12.5), 20% is double (50), 30% is triple (75).",
+        analogy: "10% is like slicing something into 10 equal bits and taking one. 250 split into 10 piles = 25 in each pile."
+      },
+      {
+        q: "A phone costs £200 and goes up by 15%. What's the new price?",
+        options: ["£230", "£215", "£30", "£300"], correct: 0,
+        concept: "For a percentage increase, work out the increase and add it on (or use a multiplier).",
+        deeper: "15% of £200 = 0.15 × 200 = £30. New price = £200 + £30 = £230. Faster way: a 15% rise means paying 115% = ×1.15, so 200 × 1.15 = £230 in one step.",
+        analogy: "Adding 15% is like a tip on a restaurant bill — you keep the original 100% and pile a bit more on top."
+      },
+      {
+        q: "In a test you scored 18 out of 24. What's that as a percentage?",
+        options: ["75%", "60%", "80%", "72%"], correct: 0,
+        concept: "To turn a score into a percentage, divide the part by the total, then multiply by 100.",
+        deeper: "18 ÷ 24 = 0.75, and 0.75 × 100 = 75%. You can also simplify first: 18/24 = 3/4 = 75%. The 'out of' number is always the one you divide by.",
+        analogy: "It's like rescaling your score onto a 'per 100' ruler so any test compares fairly — 18 out of 24 is the same standard as 75 out of 100."
+      }
+    ]
+  },
+  {
+    id: "ratio", icon: "⚖️", name: "Ratio",
+    questions: [
+      {
+        q: "Share £60 in the ratio 2:3. How much is the bigger share?",
+        options: ["£36", "£24", "£30", "£40"], correct: 0,
+        concept: "For ratio sharing: add the parts to find the total shares, find one share, then scale up.",
+        deeper: "2:3 means 5 equal parts in total. £60 ÷ 5 = £12 per part. The shares are 2 × 12 = £24 and 3 × 12 = £36 (check: 24 + 36 = 60 ✓). The bigger share is £36.",
+        analogy: "Picture 5 identical buckets. The ratio says fill 2 for one person and 3 for the other. Pour £60 evenly across all 5 (£12 each), then hand over the buckets."
+      },
+      {
+        q: "A recipe mixes flour and sugar in the ratio 3:1. With 9 cups of flour, how much sugar?",
+        options: ["3 cups", "1 cup", "9 cups", "6 cups"], correct: 0,
+        concept: "Keep a ratio in proportion — whatever you multiply one side by, multiply the other by the same.",
+        deeper: "3:1 with 9 cups of flour: 9 ÷ 3 = 3, so each 'part' is 3 cups. Sugar is 1 part = 3 cups. The amounts become 9:3, which simplifies back to 3:1 ✓.",
+        analogy: "A ratio is a recipe rule. If you triple the flour, you must triple everything else to keep the taste the same — scale it all together."
+      },
+      {
+        q: "Simplify the ratio 12:18.",
+        options: ["2:3", "6:9", "3:2", "4:6"], correct: 0,
+        concept: "Simplify a ratio by dividing both sides by their highest common factor.",
+        deeper: "The biggest number dividing both 12 and 18 is 6. 12 ÷ 6 = 2 and 18 ÷ 6 = 3, giving 2:3. (6:9 and 4:6 are smaller but not fully simplified; 3:2 has the order flipped.)",
+        analogy: "It's like reducing a fraction to lowest terms — 12/18 and 2/3 describe the same relationship, just said in the simplest way."
+      },
+      {
+        q: "Blue and red counters are in the ratio 5:2. There are 35 counters in total. How many are red?",
+        options: ["10", "25", "14", "7"], correct: 0,
+        concept: "Find the total parts, divide the total amount to get one part, then multiply for the bit you want.",
+        deeper: "5:2 → 7 parts. 35 ÷ 7 = 5 counters per part. Red = 2 parts = 2 × 5 = 10 (and blue = 25; 10 + 25 = 35 ✓).",
+        analogy: "Same bucket idea: 7 buckets with 5 counters each. Red gets 2 buckets = 10 counters."
+      }
+    ]
+  },
+  {
+    id: "algebra", icon: "🔢", name: "Algebra",
+    questions: [
+      {
+        q: "Solve: 2x + 5 = 13. What is x?",
+        options: ["4", "9", "6", "3"], correct: 0,
+        concept: "Solve an equation by doing the same thing to both sides until the letter is on its own.",
+        deeper: "Start with 2x + 5 = 13. Subtract 5 from both sides: 2x = 8. Divide both sides by 2: x = 4. Check by putting it back: 2(4) + 5 = 13 ✓. Always undo the operations in reverse order.",
+        analogy: "An equation is a balanced see-saw. Whatever you take off one side you must take off the other or it tips. Peel away the +5, then the ×2, to leave x alone."
+      },
+      {
+        q: "Expand: 3(x + 4).",
+        options: ["3x + 12", "3x + 4", "x + 12", "3x + 7"], correct: 0,
+        concept: "To expand brackets, multiply everything inside the bracket by the term outside.",
+        deeper: "3(x + 4) means 3 × x plus 3 × 4 = 3x + 12. The number outside touches BOTH terms inside — forgetting the second one (giving 3x + 4) is the most common slip.",
+        analogy: "3(x + 4) is like buying 3 identical meal deals, each with a burger (x) and a £4 drink. Three burgers and three £4 drinks = 3x + 12."
+      },
+      {
+        q: "Simplify: 5a + 3a − 2a.",
+        options: ["6a", "10a", "6a³", "0"], correct: 0,
+        concept: "You can only add or subtract 'like terms' — terms with exactly the same letter part.",
+        deeper: "5a + 3a − 2a: just combine the number coefficients, 5 + 3 − 2 = 6, and keep the a, giving 6a. The letter stays the same and the powers don't add — that's why it isn't 6a³.",
+        analogy: "Think of 'a' as apples. 5 apples + 3 apples − 2 apples = 6 apples. You'd never call them 'apples cubed' just for adding them up."
+      },
+      {
+        q: "Solve: x ÷ 3 = 7. What is x?",
+        options: ["21", "10", "4", "2.3"], correct: 0,
+        concept: "To undo a division, do the opposite — multiply both sides.",
+        deeper: "x ÷ 3 = 7 means x divided by 3 is 7. Multiply both sides by 3: x = 21. Check: 21 ÷ 3 = 7 ✓.",
+        analogy: "If splitting your money into 3 equal piles gives £7 each, then you started with 3 lots of £7 = £21. Just reverse the sharing."
+      },
+      {
+        q: "Factorise: 6x + 9.",
+        options: ["3(2x + 3)", "6(x + 9)", "3(2x + 9)", "3(6x + 3)"], correct: 0,
+        concept: "Factorising is the reverse of expanding — take out the highest common factor and put it outside a bracket.",
+        deeper: "The highest number dividing both 6 and 9 is 3. 6x ÷ 3 = 2x and 9 ÷ 3 = 3, so 6x + 9 = 3(2x + 3). Check by expanding: 3 × 2x + 3 × 3 = 6x + 9 ✓.",
+        analogy: "It's like noticing every item on a receipt was bought in 3s, so you pull out the 'times 3' and write it once outside the bracket."
+      }
+    ]
+  },
+  {
+    id: "probability", icon: "🎲", name: "Probability",
+    questions: [
+      {
+        q: "You roll a fair 6-sided dice. What's the probability of getting a 4?",
+        options: ["1/6", "1/4", "4/6", "1/2"], correct: 0,
+        concept: "Probability = (ways to get what you want) ÷ (total number of equally likely outcomes).",
+        deeper: "A dice has 6 equally likely faces. Only one of them is a '4', so P(4) = 1/6 ≈ 0.167. The number on the face doesn't matter — the chance of any single number is 1/6.",
+        analogy: "Six doors, a prize behind exactly one, all equally likely. Your chance of picking the right door first go is 1 in 6."
+      },
+      {
+        q: "A bag has 3 red and 7 blue balls. What's the probability of picking a red one?",
+        options: ["3/10", "3/7", "7/10", "1/3"], correct: 0,
+        concept: "Probability of an event = favourable outcomes over the total number of outcomes.",
+        deeper: "Total balls = 3 + 7 = 10. Reds = 3, so P(red) = 3/10 = 0.3. The total is 10, not 7 — you must count everything in the bag, not just the other colour.",
+        analogy: "If 3 out of every 10 raffle tickets are winners, your chance of grabbing a winner in one go is 3/10."
+      },
+      {
+        q: "The probability that it rains tomorrow is 0.3. What's the probability it does NOT rain?",
+        options: ["0.7", "0.3", "1.3", "0.07"], correct: 0,
+        concept: "An event happening or not happening covers everything, so the two probabilities add up to 1.",
+        deeper: "P(not rain) = 1 − P(rain) = 1 − 0.3 = 0.7. Probabilities run from 0 (impossible) to 1 (certain), and an event plus its opposite must cover all possibilities, so they total 1.",
+        analogy: "Rain or no-rain covers 100% of tomorrows. If 30% are rainy, the other 70% must be dry — there's nothing else left to be."
+      },
+      {
+        q: "A spinner has 4 equal sections: 2 green, 1 yellow, 1 pink. What's the probability of green?",
+        options: ["1/2", "1/4", "2/3", "1/3"], correct: 0,
+        concept: "When outcomes are equally likely, count the favourable sections over the total sections.",
+        deeper: "4 equal sections, 2 of them green, so P(green) = 2/4 = 1/2 = 0.5. Equal-sized sections is the key — if they were different sizes you couldn't just count them.",
+        analogy: "Half the spinner is green, so over loads of spins you'd expect green about half the time — like flipping a coin."
+      }
+    ]
+  },
+  {
+    id: "averages", icon: "📊", name: "Averages",
+    questions: [
+      {
+        q: "Find the mean of 4, 8, 6, 2.",
+        options: ["5", "6", "20", "4"], correct: 0,
+        concept: "The mean ('average') = add up all the values, then divide by how many there are.",
+        deeper: "Sum = 4 + 8 + 6 + 2 = 20. There are 4 numbers, so mean = 20 ÷ 4 = 5. The mean shares the total out equally between all the items.",
+        analogy: "Like pooling everyone's pocket money into one pot (£20) and splitting it evenly among the 4 friends — £5 each."
+      },
+      {
+        q: "Find the median of 7, 3, 9, 1, 5.",
+        options: ["5", "9", "7", "4"], correct: 0,
+        concept: "The median is the middle value — but you MUST put the numbers in order first.",
+        deeper: "In order: 1, 3, 5, 7, 9. With 5 numbers, the middle one is the 3rd: 5. If there were an even count, you'd average the two middle numbers.",
+        analogy: "Line everyone up by height; the median is whoever's standing dead centre. You can't find the middle of a messy crowd — line them up first."
+      },
+      {
+        q: "Find the mode of 2, 4, 4, 7, 9, 4, 2.",
+        options: ["4", "2", "7", "3"], correct: 0,
+        concept: "The mode is the value that appears most often.",
+        deeper: "Counting up: 2 appears twice, 4 appears three times, 7 once, 9 once. 4 is the most frequent, so the mode is 4. 'Mode' and 'most' both start with 'mo' — handy memory hook.",
+        analogy: "It's the 'most popular' value — like the best-selling flavour at an ice-cream van: whichever gets picked the most."
+      },
+      {
+        q: "Find the range of 12, 5, 20, 8.",
+        options: ["15", "20", "8", "12"], correct: 0,
+        concept: "The range measures spread: largest value minus smallest value.",
+        deeper: "Biggest = 20, smallest = 5, so range = 20 − 5 = 15. The range isn't an average — it tells you how spread out the data is, not where its centre is.",
+        analogy: "Like the gap between the tallest and shortest person in a room — it tells you how varied the heights are, not the typical height."
+      }
+    ]
+  },
+  {
+    id: "pythagoras", icon: "📐", name: "Pythagoras",
+    questions: [
+      {
+        q: "A right-angled triangle has shorter sides 3 cm and 4 cm. How long is the hypotenuse?",
+        options: ["5 cm", "7 cm", "12 cm", "25 cm"], correct: 0,
+        concept: "Pythagoras' theorem: in a right-angled triangle, a² + b² = c², where c is the longest side (the hypotenuse).",
+        deeper: "3² + 4² = 9 + 16 = 25, and the hypotenuse = √25 = 5 cm. The hypotenuse is always opposite the right angle and is the longest side. 3-4-5 is the most famous right-triangle trio.",
+        analogy: "Picture squares built on each side. Pythagoras says the two small squares' areas (9 and 16) exactly fill the big square (25) on the longest side. Square-root it to get the side length."
+      },
+      {
+        q: "In a right-angled triangle, which side is the hypotenuse?",
+        options: ["The side opposite the right angle", "The shortest side", "A side touching the right angle", "Any side you choose"], correct: 0,
+        concept: "The hypotenuse is the longest side of a right-angled triangle and sits directly opposite the right angle.",
+        deeper: "The right angle (the little square) 'points across' at the hypotenuse. Because the biggest angle faces the biggest side, the hypotenuse is always the longest. The other two sides are the 'legs'.",
+        analogy: "Stand in the corner with the right angle and look straight across the triangle — the side you're facing is the hypotenuse."
+      },
+      {
+        q: "A right-angled triangle has hypotenuse 13 and one shorter side 5. Find the other side.",
+        options: ["12", "8", "18", "14"], correct: 0,
+        concept: "To find a shorter side, rearrange Pythagoras: subtract the known square from the hypotenuse squared.",
+        deeper: "Here c = 13 and one side a = 5. b² = c² − a² = 169 − 25 = 144, so b = √144 = 12. When finding a shorter side you SUBTRACT; when finding the hypotenuse you ADD. (5-12-13 is another classic trio.)",
+        analogy: "The big square (169) is already built. One small square (25) takes up part of it; whatever's left (144) must be the other small square. Square-root it for the side."
+      },
+      {
+        q: "Do sides of 6, 8 and 10 make a right-angled triangle?",
+        options: ["Yes", "No", "Only if drawn carefully", "Impossible to tell"], correct: 0,
+        concept: "If a² + b² = c² works for the three sides, the triangle has a right angle (the converse of Pythagoras).",
+        deeper: "Test the two shorter sides against the longest: 6² + 8² = 36 + 64 = 100, and 10² = 100. They match, so yes — it's right-angled. (6-8-10 is just the 3-4-5 triangle doubled.)",
+        analogy: "It's a checker: if the two small squares add up exactly to the big square, the corner is a perfect right angle — like testing whether a picture frame is truly square."
+      }
+    ]
+  }
+];
+
+// ───────────────────────── State + storage ─────────────────────────
+const store = {
+  points: +(localStorage.getItem('ml_points') || 0),
+  best: +(localStorage.getItem('ml_best') || 0)
+};
+let state = null; // { topic, qi, answered, usedFifty, correctCount }
+let liveStreak = 0;
+
+const $ = id => document.getElementById(id);
+const els = {
+  home: $('home'), quiz: $('quiz'), summary: $('summary'),
+  grid: $('topicGrid'),
+  points: $('points'), streak: $('streak'), best: $('best'),
+  progress: $('progress'), barFill: $('barFill'),
+  qtext: $('qtext'), opts: $('opts'),
+  fiftyBtn: $('fiftyBtn'), confusedBtn: $('confusedBtn'),
+  analogyBox: $('analogyBox'), analogyText: $('analogyText'),
+  feedback: $('feedback'),
+  conceptBox: $('conceptBox'), conceptText: $('conceptText'),
+  deeperBox: $('deeperBox'), deeperText: $('deeperText'),
+  deeperBtn: $('deeperBtn'), nextBtn: $('nextBtn'),
+  sumScore: $('sumScore'), sumMsg: $('sumMsg'),
+  retryBtn: $('retryBtn'), homeBtn: $('homeBtn')
+};
+
+function refreshStats() {
+  els.points.textContent = store.points;
+  els.streak.textContent = liveStreak;
+  els.best.textContent = store.best;
+  localStorage.setItem('ml_points', store.points);
+  localStorage.setItem('ml_best', store.best);
+}
+
+function show(section) {
+  els.home.classList.add('hidden');
+  els.quiz.classList.add('hidden');
+  els.summary.classList.add('hidden');
+  section.classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+
+// ───────────────────────── Home ─────────────────────────
+function renderHome() {
+  els.grid.innerHTML = '';
+  CONTENT.forEach(topic => {
+    const b = document.createElement('button');
+    b.className = 'topic';
+    const ico = document.createElement('span'); ico.className = 'ico'; ico.textContent = topic.icon;
+    const name = document.createElement('div'); name.className = 'name'; name.textContent = topic.name;
+    const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = topic.questions.length + ' questions';
+    b.append(ico, name, meta);
+    b.addEventListener('click', () => startTopic(topic));
+    els.grid.appendChild(b);
+  });
+  show(els.home);
+}
+
+// ───────────────────────── Quiz ─────────────────────────
+function startTopic(topic) {
+  state = { topic, qi: 0, answered: false, usedFifty: false, correctCount: 0 };
+  show(els.quiz);
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const { topic, qi } = state;
+  const q = topic.questions[qi];
+  state.answered = false;
+  state.usedFifty = false;
+
+  els.progress.textContent = `${topic.name} · Q${qi + 1} of ${topic.questions.length}`;
+  els.barFill.style.width = (qi / topic.questions.length) * 100 + '%';
+  els.qtext.textContent = q.q;
+
+  // options
+  els.opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.dataset.i = i;
+    const key = document.createElement('span'); key.className = 'key'; key.textContent = 'ABCD'[i];
+    const label = document.createElement('span'); label.textContent = text;
+    btn.append(key, label);
+    btn.addEventListener('click', () => chooseOption(i));
+    els.opts.appendChild(btn);
+  });
+
+  // reset lifelines + boxes
+  els.fiftyBtn.disabled = false;
+  els.confusedBtn.disabled = false;
+  els.analogyBox.classList.add('hidden');
+  els.analogyText.textContent = q.analogy;
+  els.feedback.textContent = '';
+  els.feedback.className = 'feedback';
+  els.conceptBox.classList.add('hidden');
+  els.deeperBox.classList.add('hidden');
+  els.deeperBtn.classList.add('hidden');
+  els.nextBtn.classList.add('hidden');
+}
+
+function chooseOption(i) {
+  if (state.answered) return;
+  state.answered = true;
+  const q = state.topic.questions[state.qi];
+  const buttons = [...els.opts.querySelectorAll('.opt')];
+  buttons.forEach(b => b.disabled = true);
+  els.fiftyBtn.disabled = true;
+
+  const correct = q.correct;
+  buttons[correct].classList.add('correct');
+
+  if (i === correct) {
+    state.correctCount++;
+    liveStreak++;
+    const gain = (state.usedFifty ? 5 : 10) + liveStreak;
+    store.points += gain;
+    if (liveStreak > store.best) store.best = liveStreak;
+    els.feedback.textContent = `✅ Correct!  +${gain} pts  ·  🔥 streak ×${liveStreak}`;
+    els.feedback.className = 'feedback ok';
+    celebrate();
+  } else {
+    buttons[i].classList.add('wrong');
+    liveStreak = 0;
+    els.feedback.textContent = `❌ Not quite — the answer was ${q.options[correct]}.`;
+    els.feedback.className = 'feedback no';
+  }
+  refreshStats();
+
+  // reveal concept + deeper-dive option
+  els.conceptText.textContent = q.concept;
+  els.conceptBox.classList.remove('hidden');
+  els.deeperBtn.classList.remove('hidden');
+  els.nextBtn.textContent = (state.qi + 1 < state.topic.questions.length) ? 'Next →' : 'Finish →';
+  els.nextBtn.classList.remove('hidden');
+}
+
+function useFifty() {
+  if (state.answered || state.usedFifty) return;
+  state.usedFifty = true;
+  els.fiftyBtn.disabled = true;
+  const q = state.topic.questions[state.qi];
+  // wrong option indices, shuffled; keep one, dim the rest
+  const wrong = q.options.map((_, i) => i).filter(i => i !== q.correct);
+  for (let n = wrong.length - 1; n > 0; n--) {
+    const r = Math.floor(Math.random() * (n + 1));
+    [wrong[n], wrong[r]] = [wrong[r], wrong[n]];
+  }
+  wrong.slice(1).forEach(i => els.opts.querySelector(`.opt[data-i="${i}"]`).classList.add('dimmed'));
+}
+
+function toggleConfused() {
+  els.analogyBox.classList.toggle('hidden');
+}
+
+function toggleDeeper() {
+  const q = state.topic.questions[state.qi];
+  els.deeperText.textContent = q.deeper;
+  els.deeperBox.classList.toggle('hidden');
+}
+
+function nextQuestion() {
+  if (state.qi + 1 < state.topic.questions.length) {
+    state.qi++;
+    renderQuestion();
+  } else {
+    finishTopic();
   }
 }
 
-const hud = document.getElementById('hud');
-const controlsEl = document.getElementById('controls');
+function finishTopic() {
+  const total = state.topic.questions.length;
+  const got = state.correctCount;
+  els.sumScore.textContent = `${got} / ${total}`;
+  const pct = got / total;
+  let msg;
+  if (pct === 1) msg = "Perfect! You've nailed this topic. 🌟";
+  else if (pct >= 0.75) msg = "Great work — nearly there. Run it again to lock it in.";
+  else if (pct >= 0.5) msg = "Good effort! Review the concepts and try again.";
+  else msg = "Tricky one — read the analogies and have another go. You've got this.";
+  els.sumMsg.textContent = msg;
+  els.barFill.style.width = '100%';
+  show(els.summary);
+}
 
-// ───────────────────────── Score / streak / celebration ─────────────────────────
-const Score = {
-  points: +(localStorage.getItem('gcse_points') || 0),
-  streak: 0,
-  best: +(localStorage.getItem('gcse_best') || 0),
-  refresh() {
-    document.getElementById('points').textContent = this.points;
-    document.getElementById('streak').textContent = this.streak;
-    document.getElementById('best').textContent = this.best;
-    localStorage.setItem('gcse_points', this.points);
-    localStorage.setItem('gcse_best', this.best);
-  },
-  win(n = 1) {
-    this.streak += 1;
-    this.points += 10 * n + this.streak;  // streak bonus
-    if (this.streak > this.best) this.best = this.streak;
-    this.refresh();
-    celebrate();
-  },
-  lose() {
-    this.streak = 0;
-    this.refresh();
-  }
-};
+// ───────────────────────── Confetti ─────────────────────────
 function celebrate() {
   const colors = ['#6ee7ff', '#ff7ae0', '#7dffb0', '#ffd166', '#ffffff'];
-  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-  for (let i = 0; i < 28; i++) {
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 3;
+  for (let i = 0; i < 24; i++) {
     const d = document.createElement('div');
     d.className = 'burst';
     d.style.left = cx + 'px';
     d.style.top = cy + 'px';
     d.style.background = colors[i % colors.length];
-    const ang = (Math.PI * 2 * i) / 28 + Math.random() * 0.4;
-    const r = 140 + Math.random() * 120;
+    const ang = (Math.PI * 2 * i) / 24 + Math.random() * 0.4;
+    const r = 120 + Math.random() * 120;
     d.style.setProperty('--dx', Math.cos(ang) * r + 'px');
     d.style.setProperty('--dy', Math.sin(ang) * r + 'px');
     document.body.appendChild(d);
-    setTimeout(() => d.remove(), 750);
+    setTimeout(() => d.remove(), 800);
   }
 }
-Score.refresh();
 
-// ───────────────────────── Quiz overlay ─────────────────────────
-const Quiz = {
-  current: null,
-  open(spec) {
-    this.current = spec;
-    document.getElementById('qTitle').textContent = spec.title;
-    document.getElementById('qText').innerHTML = spec.text;
-    const inp = document.getElementById('qInput');
-    inp.value = '';
-    document.getElementById('qFeedback').textContent = '';
-    document.getElementById('qFeedback').className = 'feedback';
-    const sub = document.getElementById('qSubmit');
-    sub.textContent = 'Submit ✓';
-    sub.onclick = () => Quiz.submit();
-    document.getElementById('quiz').classList.add('show');
-    setTimeout(() => inp.focus(), 50);
-  },
-  close() {
-    document.getElementById('quiz').classList.remove('show');
-    this.current = null;
-  },
-  submit() {
-    if (!this.current) return;
-    const inp = document.getElementById('qInput');
-    const fb = document.getElementById('qFeedback');
-    const userVal = parseFloat(inp.value);
-    if (!Number.isFinite(userVal)) {
-      fb.textContent = 'Type a number!';
-      fb.className = 'feedback no';
-      return;
-    }
-    const tol = Math.max(0.05, Math.abs(this.current.answer) * 0.02);
-    const ok = Math.abs(userVal - this.current.answer) <= tol;
-    if (ok) {
-      Score.win();
-      fb.innerHTML = `✅ Correct! +${10 + Score.streak} pts · 🔥 streak ×${Score.streak}` +
-        (this.current.how ? `<div class="how">${this.current.how}</div>` : '');
-      fb.className = 'feedback ok';
-    } else {
-      Score.lose();
-      fb.innerHTML = `❌ Answer was <b>${fmt(this.current.answer, 2)}</b>` +
-        (this.current.how ? `<div class="how">${this.current.how}</div>` : '');
-      fb.className = 'feedback no';
-    }
-    // Hide submit until next question to avoid double-tap
-    document.getElementById('qSubmit').textContent = ok ? 'Next →' : 'Try another →';
-    document.getElementById('qSubmit').onclick = () => {
-      const m = modules[active];
-      if (m.challenge) Quiz.open(m.challenge());
-    };
-  }
-};
-document.getElementById('qSubmit').addEventListener('click', () => Quiz.submit());
-document.getElementById('qSkip').addEventListener('click', () => {
-  Score.lose();
-  const m = modules[active];
-  if (m.challenge) Quiz.open(m.challenge());
-});
-document.getElementById('qClose').addEventListener('click', () => Quiz.close());
-document.getElementById('qInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') Quiz.submit();
-  if (e.key === 'Escape') Quiz.close();
-});
-const rnd = (a, b, step = 1) => {
-  const n = a + Math.floor(Math.random() * ((b - a) / step + 1)) * step;
-  return Math.round(n / step) * step;
-};
-const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+// ───────────────────────── Wire up ─────────────────────────
+els.fiftyBtn.addEventListener('click', useFifty);
+els.confusedBtn.addEventListener('click', toggleConfused);
+els.deeperBtn.addEventListener('click', toggleDeeper);
+els.nextBtn.addEventListener('click', nextQuestion);
+$('backBtn').addEventListener('click', renderHome);
+els.retryBtn.addEventListener('click', () => startTopic(state.topic));
+els.homeBtn.addEventListener('click', renderHome);
 
-// ───────────────────────── Helpers ─────────────────────────
-const fmt = (n, d = 2) => Number.isFinite(n) ? (Math.abs(n) < 1e-9 ? 0 : Number(n.toFixed(d))) : '—';
-
-function makeMat(color, opts = {}) {
-  return new THREE.MeshStandardMaterial({
-    color, metalness: 0.1, roughness: 0.55, ...opts
-  });
-}
-function makeEdges(geom, color = 0x6ee7ff) {
-  const e = new THREE.EdgesGeometry(geom);
-  return new THREE.LineSegments(e, new THREE.LineBasicMaterial({ color }));
-}
-function makeLabel(text, color = '#ffffff') {
-  const canvas = document.createElement('canvas');
-  canvas.width = 256; canvas.height = 80;
-  const ctx = canvas.getContext('2d');
-  ctx.font = 'bold 48px ui-monospace, Menlo, monospace';
-  ctx.fillStyle = color;
-  ctx.strokeStyle = '#0b1020';
-  ctx.lineWidth = 6;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.strokeText(text, 128, 40);
-  ctx.fillText(text, 128, 40);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.minFilter = THREE.LinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: tex, transparent: true, depthTest: false
-  }));
-  sprite.scale.set(1.6, 0.5, 1);
-  sprite.renderOrder = 999;
-  return sprite;
-}
-
-function slider(label, min, max, step, val, onInput) {
-  const wrap = document.createElement('div');
-  wrap.className = 'group';
-  const lab = document.createElement('label');
-  const valSpan = document.createElement('span');
-  valSpan.className = 'pill';
-  valSpan.style.float = 'right';
-  valSpan.textContent = val;
-  lab.textContent = label;
-  lab.appendChild(valSpan);
-  const inp = document.createElement('input');
-  inp.type = 'range';
-  inp.min = min; inp.max = max; inp.step = step; inp.value = val;
-  inp.addEventListener('input', () => {
-    valSpan.textContent = inp.value;
-    onInput(parseFloat(inp.value));
-  });
-  wrap.appendChild(lab);
-  wrap.appendChild(inp);
-  controlsEl.appendChild(wrap);
-  return inp;
-}
-
-function selectBox(label, options, val, onChange) {
-  const wrap = document.createElement('div');
-  wrap.className = 'group';
-  const lab = document.createElement('label');
-  lab.textContent = label;
-  const sel = document.createElement('select');
-  for (const o of options) {
-    const opt = document.createElement('option');
-    opt.value = o.value; opt.textContent = o.label;
-    if (o.value === val) opt.selected = true;
-    sel.appendChild(opt);
-  }
-  sel.addEventListener('change', () => onChange(sel.value));
-  wrap.appendChild(lab); wrap.appendChild(sel);
-  controlsEl.appendChild(wrap);
-  return sel;
-}
-
-function buttonRow(buttons) {
-  const wrap = document.createElement('div');
-  wrap.className = 'group row';
-  for (const b of buttons) {
-    const btn = document.createElement('button');
-    btn.className = 'act' + (b.primary ? ' primary' : '');
-    btn.textContent = b.label;
-    btn.addEventListener('click', b.onClick);
-    wrap.appendChild(btn);
-  }
-  controlsEl.appendChild(wrap);
-}
-
-function textInput(label, val, onChange) {
-  const wrap = document.createElement('div');
-  wrap.className = 'group';
-  const lab = document.createElement('label');
-  lab.textContent = label;
-  const inp = document.createElement('input');
-  inp.type = 'text'; inp.value = val;
-  inp.addEventListener('change', () => onChange(inp.value));
-  wrap.appendChild(lab); wrap.appendChild(inp);
-  controlsEl.appendChild(wrap);
-  return inp;
-}
-
-// ═════════════════════════ Module: Shapes ═════════════════════════
-const Shapes = {
-  state: { kind: 'cuboid', a: 3, b: 2, c: 4, r: 1.5, h: 3 },
-  build() {
-    controlsEl.innerHTML = '';
-    selectBox('Shape', [
-      { value: 'cube', label: 'Cube' },
-      { value: 'cuboid', label: 'Cuboid' },
-      { value: 'cylinder', label: 'Cylinder' },
-      { value: 'cone', label: 'Cone' },
-      { value: 'sphere', label: 'Sphere' },
-      { value: 'sqpyr', label: 'Square-based pyramid' },
-      { value: 'triprism', label: 'Triangular prism' },
-    ], this.state.kind, v => { this.state.kind = v; this.rebuildControls(); this.draw(); });
-    this.rebuildControlsBody();
-  },
-  rebuildControls() {
-    // tear down everything below the shape selector
-    const keep = controlsEl.firstChild;
-    controlsEl.innerHTML = '';
-    if (keep) controlsEl.appendChild(keep);
-    this.rebuildControlsBody();
-  },
-  rebuildControlsBody() {
-    const s = this.state, redraw = () => this.draw();
-    const k = s.kind;
-    if (k === 'cube') {
-      slider('Side a', 0.5, 5, 0.1, s.a, v => { s.a = v; redraw(); });
-    } else if (k === 'cuboid') {
-      slider('Length a', 0.5, 6, 0.1, s.a, v => { s.a = v; redraw(); });
-      slider('Width b',  0.5, 6, 0.1, s.b, v => { s.b = v; redraw(); });
-      slider('Height c', 0.5, 6, 0.1, s.c, v => { s.c = v; redraw(); });
-    } else if (k === 'cylinder' || k === 'cone') {
-      slider('Radius r', 0.3, 3, 0.05, s.r, v => { s.r = v; redraw(); });
-      slider('Height h', 0.5, 6, 0.1, s.h, v => { s.h = v; redraw(); });
-    } else if (k === 'sphere') {
-      slider('Radius r', 0.3, 3, 0.05, s.r, v => { s.r = v; redraw(); });
-    } else if (k === 'sqpyr') {
-      slider('Base a', 0.5, 5, 0.1, s.a, v => { s.a = v; redraw(); });
-      slider('Height h', 0.5, 6, 0.1, s.h, v => { s.h = v; redraw(); });
-    } else if (k === 'triprism') {
-      slider('Tri base a', 0.5, 5, 0.1, s.a, v => { s.a = v; redraw(); });
-      slider('Tri height b', 0.5, 5, 0.1, s.b, v => { s.b = v; redraw(); });
-      slider('Length L', 0.5, 6, 0.1, s.c, v => { s.c = v; redraw(); });
-    }
-    buttonRow([
-      { label: '🎲 Surprise me', onClick: () => this.randomize() },
-      { label: '🎯 Challenge me', primary: true, onClick: () => Quiz.open(this.challenge()) },
-    ]);
-  },
-  randomize() {
-    const kinds = ['cube','cuboid','cylinder','cone','sphere','sqpyr','triprism'];
-    this.state.kind = pick(kinds);
-    this.state.a = rnd(1, 5, 0.5);
-    this.state.b = rnd(1, 5, 0.5);
-    this.state.c = rnd(1, 5, 0.5);
-    this.state.r = rnd(1, 3, 0.5);
-    this.state.h = rnd(1, 5, 0.5);
-    this.build();
-    this.draw();
-  },
-  challenge() {
-    this.randomize();
-    const s = this.state;
-    const ask = pick(['volume', 'sa']);
-    const PI = Math.PI;
-    let V = 0, SA = 0, label = '', howV = '', howSA = '';
-    if (s.kind === 'cube') {
-      V = s.a**3; SA = 6*s.a*s.a;
-      label = `cube with side ${s.a}`;
-      howV = `V = a³ = ${s.a}³ = <b>${fmt(V,2)}</b>`;
-      howSA = `SA = 6a² = 6 × ${s.a}² = <b>${fmt(SA,2)}</b>`;
-    } else if (s.kind === 'cuboid') {
-      V = s.a*s.b*s.c; SA = 2*(s.a*s.b+s.b*s.c+s.a*s.c);
-      label = `cuboid ${s.a}×${s.b}×${s.c}`;
-      howV = `V = a × b × c = ${s.a} × ${s.b} × ${s.c} = <b>${fmt(V,2)}</b>`;
-      howSA = `SA = 2(ab + bc + ac) = 2(${s.a*s.b} + ${s.b*s.c} + ${s.a*s.c}) = <b>${fmt(SA,2)}</b>`;
-    } else if (s.kind === 'cylinder') {
-      V = PI*s.r**2*s.h; SA = 2*PI*s.r*(s.r+s.h);
-      label = `cylinder r=${s.r}, h=${s.h}`;
-      howV = `V = πr²h = π × ${s.r}² × ${s.h} = <b>${fmt(V,2)}</b>`;
-      howSA = `SA = 2πr(r + h) = 2π × ${s.r} × ${s.r + s.h} = <b>${fmt(SA,2)}</b>`;
-    } else if (s.kind === 'cone') {
-      const slant = Math.hypot(s.r,s.h);
-      V = (1/3)*PI*s.r**2*s.h; SA = PI*s.r*(s.r+slant);
-      label = `cone r=${s.r}, h=${s.h}`;
-      howV = `V = ⅓πr²h = ⅓ × π × ${s.r}² × ${s.h} = <b>${fmt(V,2)}</b>`;
-      howSA = `slant l = √(r²+h²) = √(${s.r*s.r} + ${s.h*s.h}) = ${fmt(slant,2)}\nSA = πr(r + l) = <b>${fmt(SA,2)}</b>`;
-    } else if (s.kind === 'sphere') {
-      V = (4/3)*PI*s.r**3; SA = 4*PI*s.r**2;
-      label = `sphere r=${s.r}`;
-      howV = `V = ⁴⁄₃ πr³ = ⁴⁄₃ × π × ${s.r}³ = <b>${fmt(V,2)}</b>`;
-      howSA = `SA = 4πr² = 4 × π × ${s.r}² = <b>${fmt(SA,2)}</b>`;
-    } else if (s.kind === 'sqpyr') {
-      const slant = Math.hypot(s.a/2,s.h);
-      V = (1/3)*s.a*s.a*s.h; SA = s.a*s.a + 2*s.a*slant;
-      label = `square pyramid base=${s.a}, h=${s.h}`;
-      howV = `V = ⅓ × a² × h = ⅓ × ${s.a}² × ${s.h} = <b>${fmt(V,2)}</b>`;
-      howSA = `slant l = √((a/2)²+h²) = ${fmt(slant,2)}\nSA = a² + 2a·l = <b>${fmt(SA,2)}</b>`;
-    } else if (s.kind === 'triprism') {
-      const tri = 0.5*s.a*s.b, hyp = Math.hypot(s.a,s.b);
-      V = tri*s.c; SA = 2*tri + s.c*(s.a+s.b+hyp);
-      label = `triangular prism (legs ${s.a},${s.b}, length ${s.c})`;
-      howV = `Triangle area = ½ × ${s.a} × ${s.b} = ${fmt(tri,2)}\nV = area × L = <b>${fmt(V,2)}</b>`;
-      howSA = `2 triangles + 3 rectangles\nSA = 2(½ab) + L(a + b + √(a²+b²)) = <b>${fmt(SA,2)}</b>`;
-    }
-    if (ask === 'volume') {
-      return {
-        title: '📦 Volume',
-        text: `Find the <b>volume</b> of the ${label}.<br><span style="color:var(--muted); font-size:12px">2 d.p. · use π ≈ 3.14159</span>`,
-        answer: V, how: howV
-      };
-    } else {
-      return {
-        title: '📦 Surface area',
-        text: `Find the <b>surface area</b> of the ${label}.<br><span style="color:var(--muted); font-size:12px">2 d.p. · use π ≈ 3.14159</span>`,
-        answer: SA, how: howSA
-      };
-    }
-  },
-  draw() {
-    clearStage();
-    const s = this.state;
-    let geom, V, SA, formulaV, formulaSA, lifted = 0;
-    const PI = Math.PI;
-    if (s.kind === 'cube') {
-      geom = new THREE.BoxGeometry(s.a, s.a, s.a);
-      V = s.a ** 3; SA = 6 * s.a * s.a; lifted = s.a / 2;
-      formulaV = `V = a³ = ${s.a}³`;
-      formulaSA = `SA = 6a² = 6 × ${s.a}²`;
-    } else if (s.kind === 'cuboid') {
-      geom = new THREE.BoxGeometry(s.a, s.c, s.b);
-      V = s.a * s.b * s.c;
-      SA = 2 * (s.a * s.b + s.b * s.c + s.a * s.c);
-      lifted = s.c / 2;
-      formulaV = `V = a × b × c = ${s.a} × ${s.b} × ${s.c}`;
-      formulaSA = `SA = 2(ab + bc + ac)`;
-    } else if (s.kind === 'cylinder') {
-      geom = new THREE.CylinderGeometry(s.r, s.r, s.h, 48);
-      V = PI * s.r ** 2 * s.h;
-      SA = 2 * PI * s.r * (s.r + s.h);
-      lifted = s.h / 2;
-      formulaV = `V = πr²h = π × ${s.r}² × ${s.h}`;
-      formulaSA = `SA = 2πr(r + h)`;
-    } else if (s.kind === 'cone') {
-      geom = new THREE.ConeGeometry(s.r, s.h, 48);
-      const slant = Math.hypot(s.r, s.h);
-      V = (1 / 3) * PI * s.r ** 2 * s.h;
-      SA = PI * s.r * (s.r + slant);
-      lifted = s.h / 2;
-      formulaV = `V = ⅓πr²h`;
-      formulaSA = `SA = πr(r + l),  l = √(r²+h²) = ${fmt(slant)}`;
-    } else if (s.kind === 'sphere') {
-      geom = new THREE.SphereGeometry(s.r, 48, 32);
-      V = (4 / 3) * PI * s.r ** 3;
-      SA = 4 * PI * s.r ** 2;
-      lifted = s.r;
-      formulaV = `V = ⁴⁄₃ πr³`;
-      formulaSA = `SA = 4πr²`;
-    } else if (s.kind === 'sqpyr') {
-      // square pyramid: BufferGeometry from vertices
-      const a = s.a, h = s.h;
-      const half = a / 2;
-      const verts = new Float32Array([
-        -half, 0, -half,  half, 0, -half,  half, 0, half,
-        -half, 0, -half,  half, 0,  half, -half, 0, half,
-        -half, 0, -half,  half, 0, -half, 0, h, 0,
-         half, 0, -half,  half, 0,  half, 0, h, 0,
-         half, 0,  half, -half, 0,  half, 0, h, 0,
-        -half, 0,  half, -half, 0, -half, 0, h, 0,
-      ]);
-      geom = new THREE.BufferGeometry();
-      geom.setAttribute('position', new THREE.BufferAttribute(verts, 3));
-      geom.computeVertexNormals();
-      const slant = Math.hypot(half, h);
-      V = (1 / 3) * a * a * h;
-      SA = a * a + 2 * a * slant;
-      lifted = 0;
-      formulaV = `V = ⅓ × a² × h`;
-      formulaSA = `SA = a² + 2a·l,  l = √((a/2)²+h²) = ${fmt(slant)}`;
-    } else if (s.kind === 'triprism') {
-      // right-angled triangular prism: triangle with legs a (base) and b (height), extruded length c
-      const a = s.a, b = s.b, L = s.c;
-      const shape = new THREE.Shape();
-      shape.moveTo(-a / 2, 0);
-      shape.lineTo(a / 2, 0);
-      shape.lineTo(-a / 2, b);
-      shape.lineTo(-a / 2, 0);
-      geom = new THREE.ExtrudeGeometry(shape, { depth: L, bevelEnabled: false });
-      geom.translate(0, 0, -L / 2);
-      const tri = 0.5 * a * b;
-      const hyp = Math.hypot(a, b);
-      V = tri * L;
-      SA = 2 * tri + L * (a + b + hyp);
-      lifted = 0;
-      formulaV = `V = ½·a·b · L`;
-      formulaSA = `SA = 2·(½ab) + L·(a + b + √(a²+b²))`;
-    }
-
-    const mesh = new THREE.Mesh(geom, makeMat(0x6ee7ff, { transparent: true, opacity: 0.55 }));
-    mesh.position.y = lifted;
-    stage.add(mesh);
-    const edges = makeEdges(geom, 0xff7ae0);
-    edges.position.y = lifted;
-    stage.add(edges);
-
-    // Dimension labels (so she can see what each variable means)
-    const lab = (text, x, y, z, color = '#6ee7ff') => {
-      const sp = makeLabel(text, color);
-      sp.position.set(x, y, z);
-      stage.add(sp);
-    };
-    if (s.kind === 'cube') {
-      lab(`a = ${s.a}`, s.a / 2 + 0.4, 0.05, s.a / 2 + 0.4, '#ffd166');
-    } else if (s.kind === 'cuboid') {
-      lab(`a = ${s.a}`, 0, 0.05, s.b / 2 + 0.5, '#ffd166');
-      lab(`b = ${s.b}`, s.a / 2 + 0.5, 0.05, 0, '#7dffb0');
-      lab(`c = ${s.c}`, s.a / 2 + 0.6, s.c / 2, s.b / 2 + 0.6, '#ff7ae0');
-    } else if (s.kind === 'cylinder' || s.kind === 'cone') {
-      lab(`r = ${s.r}`, s.r + 0.4, lifted * 2 + 0.2, 0, '#ffd166');
-      lab(`h = ${s.h}`, s.r + 0.6, lifted, 0, '#ff7ae0');
-    } else if (s.kind === 'sphere') {
-      lab(`r = ${s.r}`, s.r + 0.4, lifted, 0, '#ffd166');
-    } else if (s.kind === 'sqpyr') {
-      lab(`a = ${s.a}`, 0, 0.05, s.a / 2 + 0.5, '#ffd166');
-      lab(`h = ${s.h}`, s.a / 2 + 0.6, s.h / 2, 0, '#ff7ae0');
-    } else if (s.kind === 'triprism') {
-      lab(`a = ${s.a}`, 0, 0.05, -s.c / 2 - 0.4, '#ffd166');
-      lab(`b = ${s.b}`, -s.a / 2 - 0.5, s.b / 2, -s.c / 2 - 0.4, '#7dffb0');
-      lab(`L = ${s.c}`, s.a / 2 + 0.5, 0.05, 0, '#ff7ae0');
-    }
-
-    hud.innerHTML = `
-      <h3>${s.kind.toUpperCase()}</h3>
-      <div class="tagline">Drag sliders → watch V & SA change live.</div>
-      <div class="kv"><span>Volume</span><span class="big">${fmt(V, 2)}</span></div>
-      <div class="formula">${formulaV}</div>
-      <div class="kv"><span>Surface area</span><span class="big">${fmt(SA, 2)}</span></div>
-      <div class="formula">${formulaSA}</div>
-    `;
-  }
-};
-
-// ═════════════════════════ Module: Pythagoras 3D ═════════════════════════
-const Pyth = {
-  state: { l: 4, w: 3, h: 2 },
-  build() {
-    controlsEl.innerHTML = '';
-    const s = this.state, redraw = () => this.draw();
-    slider('Length l', 0.5, 6, 0.1, s.l, v => { s.l = v; redraw(); });
-    slider('Width  w', 0.5, 6, 0.1, s.w, v => { s.w = v; redraw(); });
-    slider('Height h', 0.5, 6, 0.1, s.h, v => { s.h = v; redraw(); });
-    buttonRow([
-      { label: '🎲 Surprise me', onClick: () => this.randomize() },
-      { label: '🎯 Challenge me', primary: true, onClick: () => Quiz.open(this.challenge()) },
-    ]);
-  },
-  randomize() {
-    this.state.l = rnd(2, 6, 0.5);
-    this.state.w = rnd(2, 6, 0.5);
-    this.state.h = rnd(2, 6, 0.5);
-    this.draw();
-  },
-  challenge() {
-    this.randomize();
-    const { l, w, h } = this.state;
-    const which = pick(['space', 'base', 'angle', 'pyth2d']);
-    if (which === 'space') {
-      const D = Math.sqrt(l*l + w*w + h*h);
-      return {
-        title: '📐 Space diagonal',
-        text: `Cuboid <b>${l} × ${w} × ${h}</b>.<br>Find the <b>space diagonal</b> (corner to opposite corner).<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
-        answer: D,
-        how: `D = √(l² + w² + h²)\n  = √(${l*l} + ${w*w} + ${h*h})\n  = √${l*l+w*w+h*h}\n  = <b>${fmt(D,2)}</b>`
-      };
-    } else if (which === 'base') {
-      const d = Math.sqrt(l*l + w*w);
-      return {
-        title: '📐 Base diagonal',
-        text: `Floor of cuboid <b>${l} × ${w}</b>.<br>Find the diagonal across the base.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
-        answer: d,
-        how: `d = √(l² + w²)\n  = √(${l*l} + ${w*w})\n  = √${l*l+w*w}\n  = <b>${fmt(d,2)}</b>`
-      };
-    } else if (which === 'angle') {
-      const d = Math.sqrt(l*l + w*w);
-      const ang = Math.atan2(h, d) * 180 / Math.PI;
-      return {
-        title: '📐 Angle to base',
-        text: `Cuboid <b>${l} × ${w} × ${h}</b>.<br>Angle between space diagonal and base?<br><span style="color:var(--muted); font-size:12px">degrees · 1 d.p.</span>`,
-        answer: ang,
-        how: `Step 1: base diag d = √(${l*l}+${w*w}) = ${fmt(d,2)}\nStep 2: tan θ = h ÷ d = ${h} ÷ ${fmt(d,2)}\nθ = tan⁻¹(${fmt(h/d,3)}) = <b>${fmt(ang,1)}°</b>`
-      };
-    } else {
-      // 2D Pythagoras on a single face
-      const a = pick([3, 4, 5, 6, 8]), b = pick([3, 4, 5, 6, 8]);
-      const c = Math.sqrt(a*a + b*b);
-      return {
-        title: '📐 Pythagoras 2D',
-        text: `Right triangle with legs <b>${a}</b> and <b>${b}</b>.<br>Find the <b>hypotenuse</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
-        answer: c,
-        how: `c² = a² + b² = ${a*a} + ${b*b} = ${a*a+b*b}\nc = √${a*a+b*b} = <b>${fmt(c,2)}</b>`
-      };
-    }
-  },
-  draw() {
-    clearStage();
-    const { l, w, h } = this.state;
-    const box = new THREE.BoxGeometry(l, h, w);
-    const mesh = new THREE.Mesh(box, makeMat(0x6ee7ff, { transparent: true, opacity: 0.18 }));
-    mesh.position.set(0, h / 2, 0);
-    stage.add(mesh);
-    stage.add(makeEdges(box, 0x6ee7ff)).position.set(0, h / 2, 0);
-
-    // Corners we care about
-    const A = new THREE.Vector3(-l / 2, 0, -w / 2);  // base near corner
-    const B = new THREE.Vector3( l / 2, 0,  w / 2);  // base far corner
-    const C = new THREE.Vector3( l / 2, h,  w / 2);  // top far corner
-
-    const baseDiag = A.distanceTo(B);
-    const spaceDiag = A.distanceTo(C);
-    const angleBase = Math.atan2(w, l) * 180 / Math.PI;        // angle in base
-    const angleSpace = Math.atan2(h, baseDiag) * 180 / Math.PI; // diag with base
-
-    const line = (p, q, color) => {
-      const g = new THREE.BufferGeometry().setFromPoints([p, q]);
-      return new THREE.Line(g, new THREE.LineBasicMaterial({ color, linewidth: 2 }));
-    };
-    stage.add(line(A, B, 0xffd166)); // base diagonal
-    stage.add(line(A, C, 0xff7ae0)); // space diagonal
-    stage.add(line(B, C, 0x7dffb0)); // vertical to top corner
-
-    const dot = (p, color) => {
-      const m = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 12), makeMat(color));
-      m.position.copy(p);
-      return m;
-    };
-    stage.add(dot(A, 0xffffff));
-    stage.add(dot(B, 0xffd166));
-    stage.add(dot(C, 0xff7ae0));
-
-    // Edge labels
-    const lab = (text, x, y, z, color) => {
-      const sp = makeLabel(text, color);
-      sp.position.set(x, y, z);
-      stage.add(sp);
-    };
-    lab(`l = ${l}`, 0, 0.05, -w / 2 - 0.5, '#6ee7ff');
-    lab(`w = ${w}`, l / 2 + 0.5, 0.05, 0, '#6ee7ff');
-    lab(`h = ${h}`, l / 2 + 0.5, h / 2, w / 2, '#6ee7ff');
-    lab(`d = ${fmt(baseDiag, 2)}`, 0, 0.05, w / 2 + 0.5, '#ffd166');
-    lab(`D = ${fmt(spaceDiag, 2)}`, 0, h / 2 + 0.4, 0, '#ff7ae0');
-
-    hud.innerHTML = `
-      <h3>PYTHAGORAS 3D</h3>
-      <div class="tagline">🟡 base diag · 🟣 space diag · 🟢 height</div>
-      <div class="kv"><span>Space diag D</span><span class="big">${fmt(spaceDiag, 2)}</span></div>
-      <div class="formula">D = √(l² + w² + h²) = √(${l}² + ${w}² + ${h}²)</div>
-      <div class="kv"><span>Base diag d</span><span class="v">${fmt(baseDiag, 2)}</span></div>
-      <div class="kv"><span>Angle to base</span><span class="w">${fmt(angleSpace, 1)}°</span></div>
-      <div class="formula">θ = tan⁻¹(h ÷ d)</div>
-    `;
-  }
-};
-
-// ═════════════════════════ Module: Graph plotter ═════════════════════════
-const Graph = {
-  state: { mode: '2d', expr2d: 'x*x', expr3d: 'sin(x)*cos(y)' },
-  build() {
-    controlsEl.innerHTML = '';
-    selectBox('Mode', [
-      { value: '2d', label: '2D · y = f(x)' },
-      { value: '3d', label: '3D · z = f(x, y)' },
-    ], this.state.mode, v => { this.state.mode = v; this.rebuild(); });
-    this.rebuildBody();
-  },
-  rebuild() {
-    const keep = controlsEl.firstChild;
-    controlsEl.innerHTML = '';
-    if (keep) controlsEl.appendChild(keep);
-    this.rebuildBody();
-  },
-  rebuildBody() {
-    const s = this.state;
-    if (s.mode === '2d') {
-      const inp = textInput('y = ', s.expr2d, v => { s.expr2d = v; this.draw(); });
-      buttonRow([
-        { label: 'x²', onClick: () => { inp.value = 'x*x'; s.expr2d = inp.value; this.draw(); } },
-        { label: 'x³', onClick: () => { inp.value = 'x*x*x'; s.expr2d = inp.value; this.draw(); } },
-        { label: 'sin x', onClick: () => { inp.value = 'sin(x)'; s.expr2d = inp.value; this.draw(); } },
-      ]);
-      buttonRow([
-        { label: '1/x', onClick: () => { inp.value = '1/x'; s.expr2d = inp.value; this.draw(); } },
-        { label: '√x', onClick: () => { inp.value = 'sqrt(x)'; s.expr2d = inp.value; this.draw(); } },
-        { label: '2x+3', onClick: () => { inp.value = '2*x + 3'; s.expr2d = inp.value; this.draw(); } },
-      ]);
-    } else {
-      const inp = textInput('z = ', s.expr3d, v => { s.expr3d = v; this.draw(); });
-      buttonRow([
-        { label: 'x²+y²', onClick: () => { inp.value = 'x*x + y*y'; s.expr3d = inp.value; this.draw(); } },
-        { label: 'x²−y² (saddle)', onClick: () => { inp.value = 'x*x - y*y'; s.expr3d = inp.value; this.draw(); } },
-      ]);
-      buttonRow([
-        { label: 'sin x · cos y', onClick: () => { inp.value = 'sin(x)*cos(y)'; s.expr3d = inp.value; this.draw(); } },
-        { label: 'sin(√(x²+y²))', onClick: () => { inp.value = 'sin(sqrt(x*x+y*y))'; s.expr3d = inp.value; this.draw(); } },
-      ]);
-    }
-    buttonRow([
-      { label: '🎯 Challenge me', primary: true, onClick: () => Quiz.open(this.challenge()) },
-    ]);
-  },
-  challenge() {
-    const which = pick(['sub', 'gradient', 'intercept', 'roots']);
-    if (which === 'sub') {
-      const exprs = [
-        { f: x => x*x, l: 'y = x²', step: x => `y = x² = (${x})² = <b>${x*x}</b>` },
-        { f: x => 2*x+3, l: 'y = 2x + 3', step: x => `y = 2(${x}) + 3 = ${2*x} + 3 = <b>${2*x+3}</b>` },
-        { f: x => x*x - 4*x + 3, l: 'y = x² − 4x + 3',
-          step: x => `y = (${x})² − 4(${x}) + 3 = ${x*x} − ${4*x} + 3 = <b>${x*x - 4*x + 3}</b>` },
-        { f: x => x*x*x, l: 'y = x³', step: x => `y = (${x})³ = <b>${x*x*x}</b>` },
-        { f: x => 3*x - 5, l: 'y = 3x − 5', step: x => `y = 3(${x}) − 5 = <b>${3*x - 5}</b>` },
-      ];
-      const c = pick(exprs);
-      const x = rnd(-3, 4);
-      return {
-        title: '📈 Substitute!',
-        text: `For <b>${c.l}</b>, find <b>y when x = ${x}</b>.`,
-        answer: c.f(x), how: c.step(x)
-      };
-    } else if (which === 'gradient') {
-      const m = rnd(-4, 5), c = rnd(-5, 5);
-      return {
-        title: '📈 Gradient',
-        text: `What is the <b>gradient</b> of the line <b>y = ${m}x ${c >= 0 ? '+ ' + c : '− ' + (-c)}</b>?`,
-        answer: m,
-        how: `Compare to y = mx + c → m is the gradient → <b>${m}</b>`
-      };
-    } else if (which === 'intercept') {
-      const m = rnd(-4, 5), c = rnd(-5, 5);
-      return {
-        title: '📈 y-intercept',
-        text: `What is the <b>y-intercept</b> of <b>y = ${m}x ${c >= 0 ? '+ ' + c : '− ' + (-c)}</b>?`,
-        answer: c,
-        how: `Compare to y = mx + c → c is the y-intercept → <b>${c}</b>\n(it's where the line crosses the y-axis: x = 0)`
-      };
-    } else {
-      // Roots of (x - p)(x - q) = 0 — ask for the smaller root
-      const p = rnd(-4, 4), q = rnd(-4, 4);
-      const roots = [p, q].sort((a, b) => a - b);
-      return {
-        title: '📈 Roots',
-        text: `Solve <b>(x ${p >= 0 ? '− ' + p : '+ ' + (-p)})(x ${q >= 0 ? '− ' + q : '+ ' + (-q)}) = 0</b>.<br>Give the <b>smaller</b> root.`,
-        answer: roots[0],
-        how: `Set each bracket = 0:\nx − (${p}) = 0 → x = ${p}\nx − (${q}) = 0 → x = ${q}\nSmaller root = <b>${roots[0]}</b>`
-      };
-    }
-  },
-  compile(expr, vars) {
-    try {
-      const fn = new Function(...vars, `with(Math){return (${expr});}`);
-      // smoke test
-      fn(...vars.map(() => 1));
-      return { fn, error: null };
-    } catch (e) {
-      return { fn: null, error: e.message };
-    }
-  },
-  draw() {
-    clearStage();
-    const s = this.state;
-    if (s.mode === '2d') {
-      const { fn, error } = this.compile(s.expr2d, ['x']);
-      if (error) { hud.innerHTML = `<h3>2D GRAPH</h3><div class="formula" style="color:#ff7a7a">Error: ${error}</div>`; return; }
-      const N = 400, range = 6;
-      const pts = [];
-      let prevY = null;
-      for (let i = 0; i <= N; i++) {
-        const x = -range + (2 * range) * i / N;
-        let y;
-        try { y = fn(x); } catch { y = NaN; }
-        if (Number.isFinite(y) && Math.abs(y) < 50) {
-          pts.push(new THREE.Vector3(x, y, 0));
-          prevY = y;
-        } else if (pts.length) {
-          // start new line segment
-          const g = new THREE.BufferGeometry().setFromPoints(pts);
-          stage.add(new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0x6ee7ff })));
-          pts.length = 0;
-        }
-      }
-      if (pts.length) {
-        const g = new THREE.BufferGeometry().setFromPoints(pts);
-        stage.add(new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0x6ee7ff })));
-      }
-      // axes
-      const axisMat = new THREE.LineBasicMaterial({ color: 0x8a93c2 });
-      stage.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(
-        [new THREE.Vector3(-range, 0, 0), new THREE.Vector3(range, 0, 0)]), axisMat));
-      stage.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(
-        [new THREE.Vector3(0, -range, 0), new THREE.Vector3(0, range, 0)]), axisMat));
-
-      hud.innerHTML = `
-        <h3>2D · y = f(x)</h3>
-        <div class="formula">y = ${s.expr2d}</div>
-        <div class="kv"><span>f(0)</span><span>${fmt(safeCall(fn, 0))}</span></div>
-        <div class="kv"><span>f(1)</span><span>${fmt(safeCall(fn, 1))}</span></div>
-        <div class="kv"><span>f(2)</span><span>${fmt(safeCall(fn, 2))}</span></div>
-        <div class="kv"><span>f(-1)</span><span>${fmt(safeCall(fn, -1))}</span></div>
-        <div style="color:var(--muted); margin-top:8px; font-size:11px">
-          Range x ∈ [−6, 6]. Try editing the expression — use sin, cos, sqrt, abs, exp.
-        </div>
-      `;
-    } else {
-      const { fn, error } = this.compile(s.expr3d, ['x', 'y']);
-      if (error) { hud.innerHTML = `<h3>3D GRAPH</h3><div class="formula" style="color:#ff7a7a">Error: ${error}</div>`; return; }
-      const seg = 60, range = 5;
-      const geom = new THREE.PlaneGeometry(range * 2, range * 2, seg, seg);
-      const pos = geom.attributes.position;
-      let lo = Infinity, hi = -Infinity;
-      const zs = new Float32Array(pos.count);
-      for (let i = 0; i < pos.count; i++) {
-        const x = pos.getX(i), y = pos.getY(i);
-        let z;
-        try { z = fn(x, y); } catch { z = 0; }
-        if (!Number.isFinite(z)) z = 0;
-        zs[i] = z;
-        if (z < lo) lo = z;
-        if (z > hi) hi = z;
-      }
-      const span = Math.max(1e-6, hi - lo);
-      for (let i = 0; i < pos.count; i++) pos.setZ(i, zs[i]);
-      pos.needsUpdate = true;
-      geom.computeVertexNormals();
-
-      // colour by height
-      const colors = new Float32Array(pos.count * 3);
-      const tmp = new THREE.Color();
-      for (let i = 0; i < pos.count; i++) {
-        const t = (zs[i] - lo) / span;
-        tmp.setHSL(0.62 - 0.55 * t, 0.85, 0.55);
-        colors[i * 3] = tmp.r; colors[i * 3 + 1] = tmp.g; colors[i * 3 + 2] = tmp.b;
-      }
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-      const mat = new THREE.MeshStandardMaterial({
-        vertexColors: true, side: THREE.DoubleSide,
-        metalness: 0.05, roughness: 0.7, flatShading: false
-      });
-      const surface = new THREE.Mesh(geom, mat);
-      surface.rotation.x = -Math.PI / 2;
-      stage.add(surface);
-
-      const wire = new THREE.LineSegments(
-        new THREE.WireframeGeometry(geom),
-        new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.08 })
-      );
-      wire.rotation.x = -Math.PI / 2;
-      stage.add(wire);
-
-      hud.innerHTML = `
-        <h3>3D · z = f(x, y)</h3>
-        <div class="formula">z = ${s.expr3d}</div>
-        <div class="kv"><span>min z</span><span>${fmt(lo, 3)}</span></div>
-        <div class="kv"><span>max z</span><span>${fmt(hi, 3)}</span></div>
-        <div class="kv"><span>z(0,0)</span><span>${fmt(safeCall(fn, 0, 0))}</span></div>
-        <div style="color:var(--muted); margin-top:8px; font-size:11px">
-          Domain x,y ∈ [−5, 5]. Colour shows height.
-        </div>
-      `;
-    }
-  }
-};
-function safeCall(fn, ...args) { try { return fn(...args); } catch { return NaN; } }
-
-// ═════════════════════════ Module: Transformations ═════════════════════════
-const Trans = {
-  state: { dx: 0, dy: 0, dz: 0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1, reflect: 'none' },
-  build() {
-    controlsEl.innerHTML = '';
-    const s = this.state, redraw = () => this.draw();
-    const heading = document.createElement('div');
-    heading.className = 'group';
-    heading.innerHTML = '<h2>Translation</h2>';
-    controlsEl.appendChild(heading);
-    slider('Δx', -5, 5, 0.1, s.dx, v => { s.dx = v; redraw(); });
-    slider('Δy', -5, 5, 0.1, s.dy, v => { s.dy = v; redraw(); });
-    slider('Δz', -5, 5, 0.1, s.dz, v => { s.dz = v; redraw(); });
-
-    const h2 = document.createElement('div');
-    h2.className = 'group';
-    h2.innerHTML = '<h2>Rotation (degrees)</h2>';
-    controlsEl.appendChild(h2);
-    slider('about X', -180, 180, 1, s.rx, v => { s.rx = v; redraw(); });
-    slider('about Y', -180, 180, 1, s.ry, v => { s.ry = v; redraw(); });
-    slider('about Z', -180, 180, 1, s.rz, v => { s.rz = v; redraw(); });
-
-    const h3 = document.createElement('div');
-    h3.className = 'group';
-    h3.innerHTML = '<h2>Enlargement</h2>';
-    controlsEl.appendChild(h3);
-    slider('Scale (uniform)', -2, 3, 0.1, s.sx, v => { s.sx = v; s.sy = v; s.sz = v; redraw(); });
-
-    const h4 = document.createElement('div');
-    h4.className = 'group';
-    h4.innerHTML = '<h2>Reflection</h2>';
-    controlsEl.appendChild(h4);
-    selectBox('Reflect in plane', [
-      { value: 'none', label: 'None' },
-      { value: 'xy', label: 'xy-plane (flip z)' },
-      { value: 'yz', label: 'yz-plane (flip x)' },
-      { value: 'xz', label: 'xz-plane (flip y)' },
-    ], s.reflect, v => { s.reflect = v; redraw(); });
-
-    buttonRow([
-      { label: 'Reset', onClick: () => {
-        Object.assign(this.state, { dx:0, dy:0, dz:0, rx:0, ry:0, rz:0, sx:1, sy:1, sz:1, reflect:'none' });
-        this.build(); this.draw();
-      }},
-      { label: '🎲 Surprise me', onClick: () => this.randomize() },
-    ]);
-    buttonRow([
-      { label: '🎯 Challenge me', primary: true, onClick: () => Quiz.open(this.challenge()) },
-    ]);
-  },
-  randomize() {
-    Object.assign(this.state, {
-      dx: rnd(-3, 3, 0.5), dy: rnd(-3, 3, 0.5), dz: rnd(-3, 3, 0.5),
-      rx: rnd(-180, 180, 30), ry: rnd(-180, 180, 30), rz: rnd(-180, 180, 30),
-      sx: pick([0.5, 1, 1.5, 2, -1]), sy: 1, sz: 1, reflect: pick(['none','xy','yz','xz']),
-    });
-    this.state.sy = this.state.sx; this.state.sz = this.state.sx;
-    this.build(); this.draw();
-  },
-  challenge() {
-    const x = rnd(-4, 4), y = rnd(-4, 4);
-    const dx = rnd(-5, 5), dy = rnd(-5, 5);
-    const which = pick(['translate-x','translate-y','reflect-x','reflect-y','reflect-yx','rot90cw','rot90ac','rot180','enlarge']);
-    if (which === 'translate-x') {
-      return {
-        title: '🔄 Translation', answer: x + dx,
-        text: `Translate (${x}, ${y}) by vector (${dx}, ${dy}).<br>New <b>x</b>-coordinate?`,
-        how: `x' = x + dx = ${x} + (${dx}) = <b>${x + dx}</b>`
-      };
-    } else if (which === 'translate-y') {
-      return {
-        title: '🔄 Translation', answer: y + dy,
-        text: `Translate (${x}, ${y}) by vector (${dx}, ${dy}).<br>New <b>y</b>-coordinate?`,
-        how: `y' = y + dy = ${y} + (${dy}) = <b>${y + dy}</b>`
-      };
-    } else if (which === 'reflect-x') {
-      return {
-        title: '🔄 Reflect in x-axis', answer: -y,
-        text: `Reflect (${x}, ${y}) in the <b>x-axis</b>.<br>New <b>y</b>-coordinate?`,
-        how: `Reflecting in the x-axis flips y:\n(x, y) → (x, −y) → (${x}, <b>${-y}</b>)`
-      };
-    } else if (which === 'reflect-y') {
-      return {
-        title: '🔄 Reflect in y-axis', answer: -x,
-        text: `Reflect (${x}, ${y}) in the <b>y-axis</b>.<br>New <b>x</b>-coordinate?`,
-        how: `Reflecting in the y-axis flips x:\n(x, y) → (−x, y) → (<b>${-x}</b>, ${y})`
-      };
-    } else if (which === 'reflect-yx') {
-      return {
-        title: '🔄 Reflect in y = x', answer: x,
-        text: `Reflect (${x}, ${y}) in the line <b>y = x</b>.<br>New <b>y</b>-coordinate?`,
-        how: `Reflecting in y = x swaps x and y:\n(x, y) → (y, x) → (${y}, <b>${x}</b>)`
-      };
-    } else if (which === 'rot90cw') {
-      return {
-        title: '🔄 Rotate 90° CW', answer: -x,
-        text: `Rotate (${x}, ${y}) <b>90° clockwise</b> about origin.<br>New <b>y</b>-coordinate?`,
-        how: `90° clockwise: (x, y) → (y, −x)\n(${x}, ${y}) → (${y}, <b>${-x}</b>)`
-      };
-    } else if (which === 'rot90ac') {
-      return {
-        title: '🔄 Rotate 90° anti-CW', answer: x,
-        text: `Rotate (${x}, ${y}) <b>90° anti-clockwise</b> about origin.<br>New <b>y</b>-coordinate?`,
-        how: `90° anti-clockwise: (x, y) → (−y, x)\n(${x}, ${y}) → (${-y}, <b>${x}</b>)`
-      };
-    } else if (which === 'rot180') {
-      return {
-        title: '🔄 Rotate 180°', answer: -x,
-        text: `Rotate (${x}, ${y}) <b>180°</b> about origin.<br>New <b>x</b>-coordinate?`,
-        how: `180° rotation: (x, y) → (−x, −y)\n(${x}, ${y}) → (<b>${-x}</b>, ${-y})`
-      };
-    } else {
-      const k = pick([2, 3, -1, -2]);
-      return {
-        title: '🔄 Enlargement', answer: k * x,
-        text: `Enlarge (${x}, ${y}) by scale factor <b>${k}</b> from origin.<br>New <b>x</b>-coordinate?`,
-        how: `From origin: (x, y) → (kx, ky)\n(${x}, ${y}) → (${k}×${x}, ${k}×${y}) = (<b>${k*x}</b>, ${k*y})`
-      };
-    }
-  },
-  buildShape(color, opacity = 1) {
-    // L-shaped solid built from two cuboids — chiral so reflections are visible
-    const g = new THREE.Group();
-    const mat = makeMat(color, { transparent: opacity < 1, opacity });
-    const a = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 1), mat);
-    a.position.set(0.5, 0.5, 0);
-    const b = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat);
-    b.position.set(-0.5, 1.5, 0);
-    g.add(a); g.add(b);
-    g.add(new THREE.LineSegments(new THREE.EdgesGeometry(a.geometry),
-      new THREE.LineBasicMaterial({ color: 0xffffff }))).position.copy(a.position);
-    g.add(new THREE.LineSegments(new THREE.EdgesGeometry(b.geometry),
-      new THREE.LineBasicMaterial({ color: 0xffffff }))).position.copy(b.position);
-    return g;
-  },
-  draw() {
-    clearStage();
-    const s = this.state;
-    // Original (faded ghost)
-    const ghost = this.buildShape(0x8a93c2, 0.18);
-    stage.add(ghost);
-
-    // Transformed copy
-    const live = this.buildShape(0xff7ae0, 0.95);
-
-    // Apply: scale → reflect → rotate → translate
-    const m = new THREE.Matrix4();
-    m.identity();
-    const scaleM = new THREE.Matrix4().makeScale(s.sx, s.sy, s.sz);
-    const refM = new THREE.Matrix4().identity();
-    if (s.reflect === 'xy') refM.makeScale(1, 1, -1);
-    if (s.reflect === 'yz') refM.makeScale(-1, 1, 1);
-    if (s.reflect === 'xz') refM.makeScale(1, -1, 1);
-    const eul = new THREE.Euler(
-      s.rx * Math.PI / 180,
-      s.ry * Math.PI / 180,
-      s.rz * Math.PI / 180,
-      'XYZ'
-    );
-    const rotM = new THREE.Matrix4().makeRotationFromEuler(eul);
-    const transM = new THREE.Matrix4().makeTranslation(s.dx, s.dy, s.dz);
-    m.multiply(transM).multiply(rotM).multiply(refM).multiply(scaleM);
-    live.applyMatrix4(m);
-    stage.add(live);
-
-    // Origin marker
-    const o = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 12), makeMat(0xffd166));
-    stage.add(o);
-
-    hud.innerHTML = `
-      <h3>TRANSFORMATIONS</h3>
-      <div class="formula">Translation: ( ${fmt(s.dx)}, ${fmt(s.dy)}, ${fmt(s.dz)} )</div>
-      <div class="formula">Rotation: X ${fmt(s.rx, 0)}° · Y ${fmt(s.ry, 0)}° · Z ${fmt(s.rz, 0)}°</div>
-      <div class="formula">Scale factor: ${fmt(s.sx, 2)}${s.sx < 0 ? '  (negative → through centre)' : ''}</div>
-      <div class="formula">Reflection: ${s.reflect === 'none' ? 'none' : s.reflect + '-plane'}</div>
-      <div style="color:var(--muted); margin-top:8px; font-size:11px">
-        Grey = original · pink = image. Order applied: scale → reflect → rotate → translate.
-      </div>
-    `;
-  }
-};
-
-// ═════════════════════════ Module: Trig (SOHCAHTOA) ═════════════════════════
-const Trig = {
-  state: { angle: 30, hyp: 5 },
-  build() {
-    controlsEl.innerHTML = '';
-    const s = this.state, redraw = () => this.draw();
-    slider('Angle θ°', 5, 85, 1, s.angle, v => { s.angle = v; redraw(); });
-    slider('Hypotenuse', 1, 8, 0.1, s.hyp, v => { s.hyp = v; redraw(); });
-    buttonRow([
-      { label: '🎲 Surprise me', onClick: () => this.randomize() },
-      { label: '🎯 Challenge me', primary: true, onClick: () => Quiz.open(this.challenge()) },
-    ]);
-  },
-  randomize() {
-    this.state.angle = rnd(15, 75, 5);
-    this.state.hyp = rnd(2, 7, 0.5);
-    this.build(); this.draw();
-  },
-  draw() {
-    clearStage();
-    const { angle, hyp } = this.state;
-    const rad = angle * Math.PI / 180;
-    const opp = hyp * Math.sin(rad);
-    const adj = hyp * Math.cos(rad);
-
-    // Vertices: A at origin (right angle pos), B at (adj, 0), C at (adj, opp)
-    // Place flat on ground (XZ plane); rotate so triangle stands upright in XY for easy view
-    const A = new THREE.Vector3(0, 0, 0);
-    const B = new THREE.Vector3(adj, 0, 0);
-    const C = new THREE.Vector3(adj, opp, 0);
-
-    const line = (p, q, color, w = 4) => {
-      const g = new THREE.BufferGeometry().setFromPoints([p, q]);
-      return new THREE.Line(g, new THREE.LineBasicMaterial({ color, linewidth: w }));
-    };
-    stage.add(line(A, B, 0x7dffb0));   // adjacent (green)
-    stage.add(line(B, C, 0xffd166));   // opposite (yellow)
-    stage.add(line(A, C, 0xff7ae0));   // hypotenuse (pink)
-
-    // Filled triangle
-    const tri = new THREE.BufferGeometry();
-    tri.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
-      A.x,A.y,A.z, B.x,B.y,B.z, C.x,C.y,C.z
-    ]), 3));
-    tri.computeVertexNormals();
-    stage.add(new THREE.Mesh(tri, makeMat(0x6ee7ff, {
-      transparent: true, opacity: 0.18, side: THREE.DoubleSide
-    })));
-
-    // Right-angle marker square at B
-    const sq = 0.25;
-    const rgPts = [
-      new THREE.Vector3(B.x - sq, 0, 0),
-      new THREE.Vector3(B.x - sq, sq, 0),
-      new THREE.Vector3(B.x, sq, 0),
-    ];
-    stage.add(line(rgPts[0], rgPts[1], 0xffffff, 2));
-    stage.add(line(rgPts[1], rgPts[2], 0xffffff, 2));
-
-    // Labels
-    const lab = (text, p, color) => {
-      const sp = makeLabel(text, color);
-      sp.position.copy(p);
-      stage.add(sp);
-    };
-    lab(`Adj = ${fmt(adj,2)}`, new THREE.Vector3(adj/2, -0.4, 0), '#7dffb0');
-    lab(`Opp = ${fmt(opp,2)}`, new THREE.Vector3(adj + 0.7, opp/2, 0), '#ffd166');
-    lab(`Hyp = ${fmt(hyp,2)}`, new THREE.Vector3(adj/2 - 0.5, opp/2 + 0.3, 0), '#ff7ae0');
-    lab(`θ = ${angle}°`, new THREE.Vector3(0.6, 0.2, 0), '#ffffff');
-
-    hud.innerHTML = `
-      <h3>SOHCAHTOA</h3>
-      <div class="tagline">🟢 Adjacent · 🟡 Opposite · 🟣 Hypotenuse</div>
-      <div class="formula">SOH: sin θ = Opp / Hyp = <b>${fmt(Math.sin(rad),3)}</b></div>
-      <div class="formula">CAH: cos θ = Adj / Hyp = <b>${fmt(Math.cos(rad),3)}</b></div>
-      <div class="formula">TOA: tan θ = Opp / Adj = <b>${fmt(Math.tan(rad),3)}</b></div>
-      <div class="kv"><span>Opposite</span><span class="big">${fmt(opp,2)}</span></div>
-      <div class="kv"><span>Adjacent</span><span class="big">${fmt(adj,2)}</span></div>
-    `;
-  },
-  challenge() {
-    this.randomize();
-    const { angle, hyp } = this.state;
-    const rad = angle * Math.PI / 180;
-    const opp = hyp * Math.sin(rad), adj = hyp * Math.cos(rad);
-    const which = pick(['find-opp', 'find-adj', 'find-hyp', 'find-angle']);
-    if (which === 'find-opp') {
-      return {
-        title: '📏 Find opposite', answer: opp,
-        text: `Right triangle: angle θ = <b>${angle}°</b>, hypotenuse = <b>${fmt(hyp,2)}</b>.<br>Find the <b>opposite</b> side.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
-        how: `SOH → sin θ = Opp / Hyp\nOpp = Hyp × sin θ = ${fmt(hyp,2)} × sin(${angle}°)\n  = ${fmt(hyp,2)} × ${fmt(Math.sin(rad),4)} = <b>${fmt(opp,2)}</b>`
-      };
-    } else if (which === 'find-adj') {
-      return {
-        title: '📏 Find adjacent', answer: adj,
-        text: `θ = <b>${angle}°</b>, hypotenuse = <b>${fmt(hyp,2)}</b>.<br>Find the <b>adjacent</b> side.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
-        how: `CAH → cos θ = Adj / Hyp\nAdj = Hyp × cos θ = ${fmt(hyp,2)} × cos(${angle}°)\n  = ${fmt(hyp,2)} × ${fmt(Math.cos(rad),4)} = <b>${fmt(adj,2)}</b>`
-      };
-    } else if (which === 'find-hyp') {
-      return {
-        title: '📏 Find hypotenuse', answer: hyp,
-        text: `θ = <b>${angle}°</b>, opposite = <b>${fmt(opp,2)}</b>.<br>Find the <b>hypotenuse</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
-        how: `SOH → sin θ = Opp / Hyp  →  Hyp = Opp / sin θ\n  = ${fmt(opp,2)} / sin(${angle}°)\n  = ${fmt(opp,2)} / ${fmt(Math.sin(rad),4)} = <b>${fmt(hyp,2)}</b>`
-      };
-    } else {
-      return {
-        title: '📏 Find angle', answer: angle,
-        text: `Opposite = <b>${fmt(opp,2)}</b>, adjacent = <b>${fmt(adj,2)}</b>.<br>Find <b>θ</b>.<br><span style="color:var(--muted); font-size:12px">degrees · 1 d.p.</span>`,
-        how: `TOA → tan θ = Opp / Adj = ${fmt(opp,2)} / ${fmt(adj,2)}\n  = ${fmt(opp/adj,4)}\nθ = tan⁻¹(${fmt(opp/adj,4)}) = <b>${fmt(angle,1)}°</b>`
-      };
-    }
-  }
-};
-
-// ═════════════════════════ Module: Circles & Sectors ═════════════════════════
-const Circ = {
-  state: { r: 3, theta: 90 },
-  build() {
-    controlsEl.innerHTML = '';
-    const s = this.state, redraw = () => this.draw();
-    slider('Radius r', 0.5, 5, 0.1, s.r, v => { s.r = v; redraw(); });
-    slider('Sector angle θ°', 0, 360, 1, s.theta, v => { s.theta = v; redraw(); });
-    buttonRow([
-      { label: '🎲 Surprise me', onClick: () => this.randomize() },
-      { label: '🎯 Challenge me', primary: true, onClick: () => Quiz.open(this.challenge()) },
-    ]);
-  },
-  randomize() {
-    this.state.r = rnd(1, 5, 0.5);
-    this.state.theta = rnd(30, 330, 15);
-    this.build(); this.draw();
-  },
-  draw() {
-    clearStage();
-    const { r, theta } = this.state;
-    const rad = theta * Math.PI / 180;
-    const C = 2 * Math.PI * r;
-    const A = Math.PI * r * r;
-    const arc = (theta / 360) * C;
-    const sectorA = (theta / 360) * A;
-
-    // Full circle (faint)
-    const ringG = new THREE.RingGeometry(r * 0.998, r, 96);
-    const ring = new THREE.Mesh(ringG, makeMat(0x6ee7ff, { side: THREE.DoubleSide }));
-    ring.rotation.x = -Math.PI / 2;
-    stage.add(ring);
-    // Disc faint
-    const discG = new THREE.CircleGeometry(r, 96);
-    const disc = new THREE.Mesh(discG, makeMat(0x6ee7ff, {
-      transparent: true, opacity: 0.1, side: THREE.DoubleSide
-    }));
-    disc.rotation.x = -Math.PI / 2;
-    stage.add(disc);
-
-    // Sector highlight
-    if (theta > 0) {
-      const segs = Math.max(2, Math.round(96 * theta / 360));
-      const sectorG = new THREE.CircleGeometry(r, segs, 0, rad);
-      const sector = new THREE.Mesh(sectorG, makeMat(0xff7ae0, {
-        transparent: true, opacity: 0.55, side: THREE.DoubleSide
-      }));
-      sector.rotation.x = -Math.PI / 2;
-      stage.add(sector);
-
-      // Two radii
-      const line = (p, q, color) => {
-        const g = new THREE.BufferGeometry().setFromPoints([p, q]);
-        return new THREE.Line(g, new THREE.LineBasicMaterial({ color, linewidth: 3 }));
-      };
-      stage.add(line(new THREE.Vector3(0, 0.01, 0), new THREE.Vector3(r, 0.01, 0), 0xffd166));
-      stage.add(line(new THREE.Vector3(0, 0.01, 0),
-        new THREE.Vector3(r * Math.cos(rad), 0.01, -r * Math.sin(rad)), 0xffd166));
-    }
-
-    // Labels
-    const lab = (text, x, y, z, color) => {
-      const sp = makeLabel(text, color);
-      sp.position.set(x, y, z);
-      stage.add(sp);
-    };
-    lab(`r = ${fmt(r,2)}`, r / 2, 0.05, 0.4, '#ffd166');
-    lab(`θ = ${theta}°`, 0.4, 0.05, -0.4, '#ff7ae0');
-
-    hud.innerHTML = `
-      <h3>CIRCLE & SECTOR</h3>
-      <div class="tagline">Pink slice = sector for angle θ</div>
-      <div class="kv"><span>Circumference</span><span class="big">${fmt(C,2)}</span></div>
-      <div class="formula">C = 2πr = 2 × π × ${fmt(r,2)}</div>
-      <div class="kv"><span>Area</span><span class="big">${fmt(A,2)}</span></div>
-      <div class="formula">A = πr² = π × ${fmt(r,2)}²</div>
-      <div class="kv"><span>Arc length</span><span class="v">${fmt(arc,2)}</span></div>
-      <div class="formula">arc = (θ/360) × 2πr</div>
-      <div class="kv"><span>Sector area</span><span class="v">${fmt(sectorA,2)}</span></div>
-      <div class="formula">sector = (θ/360) × πr²</div>
-    `;
-  },
-  challenge() {
-    this.randomize();
-    const { r, theta } = this.state;
-    const PI = Math.PI;
-    const C = 2 * PI * r, A = PI * r * r;
-    const arc = (theta / 360) * C, sec = (theta / 360) * A;
-    const which = pick(['circ', 'area', 'arc', 'sector']);
-    if (which === 'circ') {
-      return {
-        title: '⭕ Circumference', answer: C,
-        text: `Circle with radius <b>${fmt(r,2)}</b>.<br>Find the <b>circumference</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p. · π = 3.14159</span>`,
-        how: `C = 2πr = 2 × π × ${fmt(r,2)}\n  = ${fmt(2*r,2)}π = <b>${fmt(C,2)}</b>`
-      };
-    } else if (which === 'area') {
-      return {
-        title: '⭕ Area', answer: A,
-        text: `Circle with radius <b>${fmt(r,2)}</b>.<br>Find the <b>area</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
-        how: `A = πr² = π × ${fmt(r,2)}² = ${fmt(r*r,2)}π = <b>${fmt(A,2)}</b>`
-      };
-    } else if (which === 'arc') {
-      return {
-        title: '⭕ Arc length', answer: arc,
-        text: `Sector: r = <b>${fmt(r,2)}</b>, θ = <b>${theta}°</b>.<br>Find the <b>arc length</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
-        how: `arc = (θ/360) × 2πr\n  = (${theta}/360) × 2π × ${fmt(r,2)}\n  = ${fmt(theta/360,3)} × ${fmt(C,2)} = <b>${fmt(arc,2)}</b>`
-      };
-    } else {
-      return {
-        title: '⭕ Sector area', answer: sec,
-        text: `Sector: r = <b>${fmt(r,2)}</b>, θ = <b>${theta}°</b>.<br>Find the <b>sector area</b>.<br><span style="color:var(--muted); font-size:12px">2 d.p.</span>`,
-        how: `sector = (θ/360) × πr²\n  = (${theta}/360) × π × ${fmt(r,2)}²\n  = ${fmt(theta/360,3)} × ${fmt(A,2)} = <b>${fmt(sec,2)}</b>`
-      };
-    }
-  }
-};
-
-// ───────────────────────── Tab routing ─────────────────────────
-const modules = { shapes: Shapes, pyth: Pyth, graph: Graph, trans: Trans, trig: Trig, circ: Circ };
-let active = 'shapes';
-function activate(name) {
-  active = name;
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mod === name));
-  modules[name].build();
-  modules[name].draw();
-}
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => activate(t.dataset.mod));
-});
-activate('shapes');
-
-// ───────────────────────── Render loop ─────────────────────────
-function tick() {
-  controls.update();
-  renderer.render(scene, camera);
-  requestAnimationFrame(tick);
-}
-tick();
+refreshStats();
+renderHome();
 </script>
 </body>
 </html>
