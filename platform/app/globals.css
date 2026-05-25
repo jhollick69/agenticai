@@ -172,6 +172,72 @@ section { margin-bottom: 16px; }
 .footer a:hover { color: var(--accent); }
 .footMuted { color: var(--muted); margin-left: auto; }
 
+/* ─── Dyslexia-friendly reading mode ───────────────────────────────────────────
+   Toggled by a cookie read in the root layout (body.dyslexia). Evidence-backed
+   adjustments: a warm low-glare background, generous letter/word/line spacing,
+   a highly legible font, flatter visuals (less glow/gradient noise) and left
+   alignment. To add a dedicated font (e.g. OpenDyslexic/Lexend), drop it into the
+   font-family below — nothing else needs to change. */
+body.dyslexia {
+  --bg: #f7f1e1;
+  --panel: #fffaf0;
+  --panel2: #f1e9d6;
+  --slot: #fffdf8;
+  --ink: #2e2a23;
+  --muted: #6f6757;
+  --accent: #1d4ed8;
+  --accent2: #6d28d9;
+  --accent3: #0e7490;
+  --good: #15803d;
+  --bad: #b91c1c;
+  --warn: #8a5a08;
+  --line: #ddd0b3;
+  background-image: none;
+  background-color: var(--bg);
+  font-family: Verdana, "Trebuchet MS", "Atkinson Hyperlegible", system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.9;
+  letter-spacing: .035em;
+  word-spacing: .16em;
+}
+body.dyslexia p, body.dyslexia li { margin-top: 8px; margin-bottom: 8px; }
+/* Flatten attention-grabbing glows/shadows for a calmer page. */
+body.dyslexia .card,
+body.dyslexia .btn,
+body.dyslexia .topic,
+body.dyslexia .plan,
+body.dyslexia .examCard,
+body.dyslexia .feature,
+body.dyslexia .brand { box-shadow: none !important; filter: none !important; }
+body.dyslexia .btn:hover,
+body.dyslexia .topic:hover,
+body.dyslexia .plan:hover,
+body.dyslexia .examCard:hover { box-shadow: none !important; transform: none; }
+/* Replace gradient text with a solid, high-legibility colour. */
+body.dyslexia .brand,
+body.dyslexia .grad,
+body.dyslexia .faqItem h3 {
+  background: none !important;
+  -webkit-background-clip: border-box; background-clip: border-box;
+  color: var(--accent) !important; -webkit-text-fill-color: var(--accent);
+}
+/* Solid (not gradient) fills with clear contrast. */
+body.dyslexia .btn.primary,
+body.dyslexia .pill.premium,
+body.dyslexia .gradePill {
+  background: var(--accent) !important; color: #fff !important; -webkit-text-fill-color: #fff;
+}
+body.dyslexia .topic,
+body.dyslexia .feature,
+body.dyslexia .examCard { background: var(--panel); }
+body.dyslexia .examGo,
+body.dyslexia .topic .meta.has { color: var(--accent); }
+/* Left-align reading-heavy areas. */
+body.dyslexia .hero { text-align: left; }
+body.dyslexia .hero .actions { justify-content: flex-start; }
+body.dyslexia .hero .note { text-align: left !important; }
+body.dyslexia .kicker { background: var(--panel2); border-color: var(--line); color: var(--ink); }
+
 /* ─── Legal pages ─── */
 .legal h2 { font-size: 17px; margin: 20px 0 6px; }
 .legal p, .legal li { color: var(--ink); line-height: 1.6; }

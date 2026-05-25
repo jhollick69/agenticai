@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { getEntitlement } from "@/lib/entitlement";
+import ReadingToggle from "@/components/ReadingToggle";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const DESCRIPTION =
@@ -30,9 +32,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const ent = await getEntitlement();
+  const reading = cookies().get("reading")?.value;
   return (
     <html lang="en">
-      <body>
+      <body className={reading === "dyslexia" ? "dyslexia" : undefined}>
         <div className="wrap">
           <div className="topbar">
             <Link href="/" className="brand">
@@ -41,6 +44,7 @@ export default async function RootLayout({
             <Link href="/learn" className="btn">
               Topics
             </Link>
+            <ReadingToggle />
             {ent.signedIn ? (
               <>
                 <span className={"pill" + (ent.isPremium ? " premium" : "")}>
