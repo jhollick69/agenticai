@@ -28,7 +28,7 @@ Don't run it yet — first we need your keys (Parts 2–4).
   - **Project URL**
   - **anon public** key
   - **service_role** key  *(secret — treat like a password)*
-- [ ] In the left sidebar: **SQL Editor → New query**. Open the file `platform/supabase/schema.sql`, copy **all** of it, paste it in, and press **Run**. You should see "Success". *(This builds the table that remembers who has paid.)*
+- [ ] In the left sidebar: **SQL Editor → New query**. Open the file `platform/supabase/schema.sql`, copy **all** of it, paste it in, and press **Run**. You should see "Success". *(This builds the tables that remember who has paid and each learner's progress. It's safe to re-run any time if the file changes.)*
 - [ ] In the left sidebar: **Authentication → Providers → Email** → make sure it's **enabled**. While testing, you can switch **off** "Confirm email" so sign-up logs you straight in.
 
 ---

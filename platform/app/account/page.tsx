@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getEntitlement } from "@/lib/entitlement";
+import { getProgressMap } from "@/lib/progress";
 import AuthForm from "@/components/AuthForm";
 import UpgradeButtons from "@/components/UpgradeButtons";
 import AccountActions from "@/components/AccountActions";
@@ -9,7 +10,9 @@ export default async function AccountPage({
 }: {
   searchParams: { upgrade?: string; status?: string };
 }) {
-  const ent = await getEntitlement();
+  const [ent, progress] = await Promise.all([getEntitlement(), getProgressMap()]);
+  const attempted = Object.keys(progress).length;
+  const mastered = Object.values(progress).filter((p) => p.completed).length;
 
   if (!ent.signedIn) {
     return (
@@ -30,6 +33,14 @@ export default async function AccountPage({
         Signed in as <strong>{ent.email}</strong> ·{" "}
         {ent.isPremium ? "✦ Premium" : "Free plan"}
       </p>
+
+      {attempted > 0 && (
+        <p className="sub">
+          📈 You&apos;ve mastered <strong>{mastered}</strong>{" "}
+          {mastered === 1 ? "topic" : "topics"} and attempted {attempted} so far. Keep the streak
+          going!
+        </p>
+      )}
 
       {searchParams.status === "success" && (
         <p className="msg good">🎉 Payment received — your Premium access is active!</p>

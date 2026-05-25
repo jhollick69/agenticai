@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Topic } from "@/lib/content";
+import { createClient } from "@/lib/supabase/client";
 
 type Shuffled = { text: string; isCorrect: boolean };
 
@@ -25,6 +26,51 @@ export default function Quiz({ topic }: { topic: Topic }) {
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [done, setDone] = useState(false);
+  const [saved, setSaved] = useState<"idle" | "saving" | "done">("idle");
+
+  // When a topic is finished, save the result for signed-in users (keeping their
+  // best score). Signed-out players simply aren't saved — no error, no nag.
+  useEffect(() => {
+    if (!done) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user || cancelled) return;
+        setSaved("saving");
+        const total = topic.questions.length;
+        const { data: existing } = await supabase
+          .from("progress")
+          .select("best_score, attempts")
+          .eq("user_id", user.id)
+          .eq("topic_id", topic.id)
+          .maybeSingle();
+        const best = Math.max(existing?.best_score ?? 0, score);
+        await supabase.from("progress").upsert(
+          {
+            user_id: user.id,
+            topic_id: topic.id,
+            best_score: best,
+            last_score: score,
+            total,
+            attempts: (existing?.attempts ?? 0) + 1,
+            completed: best >= total,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,topic_id" },
+        );
+        if (!cancelled) setSaved("done");
+      } catch {
+        if (!cancelled) setSaved("idle");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [done, score, topic.id, topic.questions.length]);
 
   const q = topic.questions[qi];
 
@@ -80,6 +126,7 @@ export default function Quiz({ topic }: { topic: Topic }) {
     setScore(0);
     setStreak(0);
     setDone(false);
+    setSaved("idle");
   }
 
   if (done) {
@@ -100,6 +147,7 @@ export default function Quiz({ topic }: { topic: Topic }) {
           {score} / {total}
         </div>
         <p className="sub">{msg}</p>
+        {saved === "done" && <p className="msg good">✓ Progress saved</p>}
         <div className="actions" style={{ justifyContent: "center" }}>
           <button className="btn" onClick={restart}>
             ↻ Try again

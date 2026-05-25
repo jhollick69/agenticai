@@ -53,6 +53,9 @@ h1 { font-size: 22px; margin: 0 0 6px; }
 .topic .name { font-weight: 700; font-size: 15px; }
 .topic .meta { color: var(--muted); font-size: 12px; margin-top: 4px; }
 .topic .lock { position: absolute; top: 10px; right: 12px; font-size: 15px; }
+.topic.mastered { border-color: rgba(125,255,176,.5); }
+.topic.mastered .lock { color: var(--good); }
+.topic .meta.has { color: var(--accent); font-weight: 700; }
 
 .btn {
   display: inline-block; background: var(--panel2); border: 1px solid var(--line); color: var(--ink);
