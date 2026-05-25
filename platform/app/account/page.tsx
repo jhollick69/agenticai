@@ -42,7 +42,7 @@ export default async function AccountPage({
         <>
           <p>You have full access to every topic. Nice one.</p>
           <div className="actions">
-            <Link href="/" className="btn primary">
+            <Link href="/learn" className="btn primary">
               Start revising →
             </Link>
             <AccountActions mode="portal" />

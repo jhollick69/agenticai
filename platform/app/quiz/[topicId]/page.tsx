@@ -25,7 +25,7 @@ export default async function QuizPage({
   return (
     <main className="card">
       <div style={{ marginBottom: 12 }}>
-        <Link href="/" className="btn">
+        <Link href="/learn" className="btn">
           ← Topics
         </Link>
       </div>
