@@ -279,8 +279,8 @@ export default function Quiz({
                 style={{
                   flex: "0 0 28px",
                   height: 28,
-                  borderRadius: 8,
-                  background: "#0e1430",
+                  borderRadius: 9,
+                  background: "var(--slot)",
                   border: "1px solid var(--line)",
                   display: "grid",
                   placeItems: "center",
@@ -309,7 +309,7 @@ export default function Quiz({
       {showAnalogy && (
         <div
           className="card"
-          style={{ marginTop: 14, background: "rgba(255,209,102,.10)", borderColor: "rgba(255,209,102,.4)" }}
+          style={{ marginTop: 14, background: "rgba(251,191,36,.12)", borderColor: "rgba(251,191,36,.45)" }}
         >
           <strong style={{ color: "var(--warn)" }}>🤔 Simple analogy</strong>
           <p style={{ margin: "6px 0 0" }}>{q.analogy}</p>
@@ -325,7 +325,7 @@ export default function Quiz({
           </p>
           <div
             className="card"
-            style={{ marginTop: 8, background: "rgba(110,231,255,.08)", borderColor: "rgba(110,231,255,.35)" }}
+            style={{ marginTop: 8, background: "rgba(167,139,250,.12)", borderColor: "rgba(167,139,250,.4)" }}
           >
             <strong style={{ color: "var(--accent)" }}>💡 The concept</strong>
             <p style={{ margin: "6px 0 0" }}>{q.concept}</p>
@@ -333,7 +333,7 @@ export default function Quiz({
           {showDeeper && (
             <div
               className="card"
-              style={{ marginTop: 8, background: "rgba(255,122,224,.08)", borderColor: "rgba(255,122,224,.35)" }}
+              style={{ marginTop: 8, background: "rgba(244,114,182,.12)", borderColor: "rgba(244,114,182,.4)" }}
             >
               <strong style={{ color: "var(--accent2)" }}>🔍 Deeper dive</strong>
               <p style={{ margin: "6px 0 0" }}>{q.deeper}</p>
