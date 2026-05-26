@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getTopic } from "@/lib/content";
 import { getEntitlement } from "@/lib/entitlement";
+import { getQuestions } from "@/lib/questions";
 import Quiz from "@/components/Quiz";
 
 // Server Component. This is the real security boundary: a premium topic's questions
@@ -22,6 +23,8 @@ export default async function QuizPage({
     }
   }
 
+  const questions = await getQuestions(topic, { limit: 8 });
+
   return (
     <main className="card">
       <div style={{ marginBottom: 12 }}>
@@ -29,7 +32,7 @@ export default async function QuizPage({
           ← Topics
         </Link>
       </div>
-      <Quiz topic={topic} />
+      <Quiz topic={{ ...topic, questions }} />
     </main>
   );
 }

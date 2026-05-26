@@ -82,6 +82,17 @@ If that works, the money plumbing is correct.
 
 ---
 
+## Optional — managing questions
+
+The app works out of the box with its built-in questions, and calculation topics
+generate fresh number variations automatically. To edit/add questions yourself:
+
+- [ ] Set `ADMIN_EMAILS` in `.env.local` to your email (comma-separate several).
+- [ ] Sign in with that email, then visit **`/admin`**.
+- [ ] Click **Import built-in questions** once to load the 100 questions into the database, then use **Add a question** to extend the bank — no redeploy needed.
+
+(If you skip this, the app simply uses the built-in bank — nothing breaks.)
+
 ## Part 6 — Put it on the internet (Vercel)
 
 - [ ] Push this project to **GitHub** (ask me and I can help, or use GitHub Desktop).

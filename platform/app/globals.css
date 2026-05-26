@@ -106,11 +106,12 @@ h1 { font-size: 26px; margin: 0 0 6px; font-weight: 900; letter-spacing: -.01em;
 .btn.primary:hover { box-shadow: 0 12px 32px rgba(244,114,182,.5); }
 .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 
-input[type=email], input[type=password], input[type=text] {
+input[type=email], input[type=password], input[type=text], textarea, select {
   width: 100%; background: var(--slot); border: 1px solid var(--line); color: var(--ink);
-  padding: 13px 15px; border-radius: 14px; font-size: 16px; margin-bottom: 10px;
+  padding: 13px 15px; border-radius: 14px; font-size: 16px; margin-bottom: 10px; font-family: inherit;
 }
-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(167,139,250,.25); }
+textarea { min-height: 64px; resize: vertical; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(167,139,250,.25); }
 label { display: block; color: var(--muted); font-size: 13px; margin-bottom: 4px; }
 
 .perks { list-style: none; padding: 0; margin: 6px 0 18px; display: grid; gap: 8px; }

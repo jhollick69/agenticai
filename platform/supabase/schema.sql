@@ -77,3 +77,28 @@ create policy "progress update own"
   on public.progress for update
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- ─── Editable question bank ───────────────────────────────────────────────────
+-- Questions live here so they can be edited/added without a redeploy. RLS is on
+-- with NO policies, so neither the anon nor the signed-in key can read or write
+-- this table — only the server's service-role key (used after the paywall check)
+-- can. That keeps premium questions from leaking to the browser.
+create table if not exists public.questions (
+  id          uuid primary key default gen_random_uuid(),
+  topic_id    text not null,
+  level       text not null default 'gcse',
+  q           text not null,
+  options     jsonb not null,
+  correct     int not null default 0,
+  concept     text not null default '',
+  deeper      text not null default '',
+  analogy     text not null default '',
+  source      text not null default 'manual',
+  active      boolean not null default true,
+  created_at  timestamptz not null default now()
+);
+
+alter table public.questions enable row level security;
+-- (Intentionally no policies — service role only.)
+
+create index if not exists questions_topic_idx on public.questions (topic_id) where active;

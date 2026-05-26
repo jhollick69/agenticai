@@ -18,7 +18,7 @@ export default async function ExamPage({
   }
 
   const level: Level = searchParams.level === "alevel" ? "alevel" : "gcse";
-  const exam = buildMockExam(level, 12);
+  const exam = await buildMockExam(level, 12);
 
   return (
     <main className="card">
